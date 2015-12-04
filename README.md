@@ -1,2 +1,2 @@
 # GeologicalTime
-# video documentary that tends towards geological time
+video documentary that tends towards geological time
