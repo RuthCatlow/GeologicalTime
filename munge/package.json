@@ -1,0 +1,26 @@
+{
+  "name": "munge",
+  "version": "1.0.0",
+  "description": "Munging images into video using FFMPEG",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RuthCatlow/GeologicalTime"
+  },
+  "author": "",
+  "license": {
+    "notValid": true
+  },
+  "bugs": {
+    "url": "https://github.com/RuthCatlow/GeologicalTime/issues"
+  },
+  "homepage": "https://github.com/RuthCatlow/GeologicalTime",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "rimraf": "^2.5.0",
+    "walk": "^2.3.9"
+  }
+}
