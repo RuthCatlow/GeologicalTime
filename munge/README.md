@@ -9,6 +9,6 @@
 * Make script executable: `chmod +x munge.sh`
 * Start munging: `./munge.sh`
 
-### Notes
+ #### Notes
 * By default looks for all files in `images/` directory in same directory as script
 * Use `-d [directory]` to change this default.
