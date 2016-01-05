@@ -5,3 +5,15 @@ application.linux64
 application.windows32
 application.windows64
 application.macosx
+
+.env
+
+latest.mp4
+latest-*.mp4
+foo.txt
+munge/images-source
+
+log.txt
+
+output/images/*
+output/videos/*
