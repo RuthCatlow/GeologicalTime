@@ -10,14 +10,18 @@ var util = require('util');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
+var Client = require('ftp');
 
 program
   .version('0.0.1')
-  .option('-d, --directory [path]', 'Change the image directory (default:"images")', 'images')
+  .option('-i, --input [path]', 'Change the image directory input (default:"images")', '../output/images/')
+  .option('-v, --output [path]', 'Change the video output directory (default:"videos")', '../output/videos/')
   .parse(process.argv);
 
+console.time('videoencoding')
+
 var images = [];
-var walker = walk.walk(program.directory, {
+var walker = walk.walk(program.input, {
   followLinks: false,
   filters: ["Temp", "_Temp", ".git", ".gitkeep"]
 });
@@ -35,6 +39,7 @@ rmraf.sync('./tmp');
 mkdirSync('./tmp');
 
 walker.on("files", function (root, stats, next) {
+  // console.log(stats.length)
   var nextImages = stats.map(function(file){
     return root + '/' + file.name;
   })
@@ -42,6 +47,7 @@ walker.on("files", function (root, stats, next) {
   nextImages = nextImages.filter(function(file){
     return ['png', 'jpg', 'jpeg'].indexOf(file.split('.').pop().toLowerCase()) > -1;
   });
+  console.log(nextImages.length)
 
   images = images.concat(nextImages.reverse());
   next();
@@ -65,13 +71,13 @@ function copyImagesToTmp(files, startIndex){
 }
 
 function* copyImagesGenerator(){
-
-  images = images.reverse()
   var sliceLength = 1000
   var slices = Math.ceil(images.length/sliceLength)
   var slice = []
-
   var i = 0
+
+  images = images.reverse()
+
   while(i < slices){
     var begin = i*sliceLength
     var end = (i+1)*sliceLength;
@@ -82,19 +88,21 @@ function* copyImagesGenerator(){
 }
 
 var runGenerator = function (fn) {
-
   return new Promise(function(resolve, reject){
     var next = function (err, arg) {
-      if (err) return it.throw(err);
+      if(err){
+        return it.throw(err);
+      }
 
       var result = it.next(arg);
-      if (result.done) resolve();
+      if(result.done){
+        resolve();
+      }
 
       if (typeof result.value == 'function') {
         result.value(next);
       }
     }
-
     var it = fn();
     next();
   })
@@ -107,9 +115,9 @@ walker.on("end", function () {
   })
 });
 
-function run_cmd(cmd, args, callback ) {
+function run_cmd(cmd, args, detached, callback ) {
   var spawn = require('child_process').spawn;
-  var child = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+  var child = spawn(cmd, args, { detached : detached || false, stdio: ['pipe', 'pipe', 'pipe'] });
   var resp = "";
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
@@ -132,14 +140,17 @@ function writeVideo(){
     '-r', '24',
     '-crf', '26',
     '-movflags', 'faststart',
-    'latest.mp4'
+    program.output+'video-'+pad('00000', images.length)+'.mp4'
   ];
   console.log('command: ffmpeg '+ args.join(' '));
-  console.time('videoencoding')
   run_cmd(
     'ffmpeg', args, function(text){
       console.timeEnd('videoencoding')
       console.log(text)
     }
   );
+}
+
+function pad(pad, str) {
+  return (pad + str).slice(-pad.length);
 }

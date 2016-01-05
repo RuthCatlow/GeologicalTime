@@ -20,6 +20,8 @@
   "homepage": "https://github.com/RuthCatlow/GeologicalTime",
   "dependencies": {
     "commander": "^2.9.0",
+    "dotenv": "^1.2.0",
+    "ftp": "^0.3.10",
     "rimraf": "^2.5.0",
     "walk": "^2.3.9"
   }
