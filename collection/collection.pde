@@ -6,6 +6,7 @@ BufferedReader reader;
 
 Capture cam;
 String logFilename = "log.txt";
+String outputDirectory = "../output/images/";
 
 long mostRecent;
 
@@ -58,9 +59,6 @@ void draw() {
   long currentTime = d.getTime()/1000; // in seconds
   int timeout = 60*3; // x minutes in seconds.
 
-  // println(currentTime);
-  // println(timeout);
-
   int countdownSeconds = round(timeout-currentTime%timeout);
   //println(countdownSeconds);
   countdown(countdownSeconds);
@@ -68,13 +66,17 @@ void draw() {
   // Have we passed the most recent stored time and is this time
   // divisible by 3 minutes?
   if (currentTime > mostRecent && currentTime%timeout == 0) {
+    String directory = year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
     // Store this minute so we don't continually take more images.
     mostRecent = currentTime;
     // Save image with 'year-date-month' directory and 'hour-min' file. 
-    saveFrame(year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/"+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
+    saveFrame(outputDirectory+directory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
     log = createWriter("log.txt");
     log.println(mostRecent);
     log.flush(); 
     log.close();
+    
+    // Runtime rt = Runtime.getRuntime();
+    // Process pr = rt.exec('../munge/munge.sh -d ../output');
   }
 }
