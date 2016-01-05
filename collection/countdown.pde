@@ -1,7 +1,7 @@
 void countdown(int seconds) {
 
   if(seconds <= 3){
-      drawCircle();
+    drawCircle();
     drawLargeCountdown(seconds);
   } else if(seconds <= 170){
     drawCountdown(seconds);
