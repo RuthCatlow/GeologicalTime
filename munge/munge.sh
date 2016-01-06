@@ -7,24 +7,26 @@
 var fs = require('fs');
 var util = require('util');
 
+var winston = require('winston');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
 var Client = require('ftp');
 
+winston.add(winston.transports.File, {filename: 'munge.log', timestamp: true});
+
 program
   .version('0.0.1')
   .option('-i, --input [path]', 'Change the image directory input (default:"images")', '../output/images/')
-  .option('-v, --output [path]', 'Change the video output directory (default:"videos")', '../output/videos/')
+  .option('-v, --output [path]', 'Change the video output directory (default:"videos")', __dirname+'/../output/videos/')
   .parse(process.argv);
-
-console.time('videoencoding')
 
 var images = [];
 var walker = walk.walk(program.input, {
   followLinks: false,
   filters: ["Temp", "_Temp", ".git", ".gitkeep"]
 });
+var startTime = process.hrtime();
 
 var mkdirSync = function (path) {
   try {
@@ -39,7 +41,6 @@ rmraf.sync('./tmp');
 mkdirSync('./tmp');
 
 walker.on("files", function (root, stats, next) {
-  // console.log(stats.length)
   var nextImages = stats.map(function(file){
     return root + '/' + file.name;
   })
@@ -47,10 +48,17 @@ walker.on("files", function (root, stats, next) {
   nextImages = nextImages.filter(function(file){
     return ['png', 'jpg', 'jpeg'].indexOf(file.split('.').pop().toLowerCase()) > -1;
   });
-  console.log(nextImages.length)
+  winston.log('debug', 'Amount of images: ' + nextImages.length)
 
   images = images.concat(nextImages.reverse());
   next();
+});
+
+walker.on("end", function () {
+  runGenerator(copyImagesGenerator).then(function(){
+    winston.log('info', 'Images copied')
+    writeVideo()
+  })
 });
 
 function copyImagesToTmp(files, startIndex){
@@ -78,19 +86,24 @@ function* copyImagesGenerator(){
 
   images = images.reverse()
 
+  winston.log('info', 'Start copying images');
   while(i < slices){
+    winston.log('debug', 'Image batch '+ (i+1) + ' start');
     var begin = i*sliceLength
     var end = (i+1)*sliceLength;
     slice = (i < slices-1) ? images.slice(begin, end) : images.slice(begin)
     yield copyImagesToTmp(slice, begin)
     i++
+    winston.log('debug', 'Image batch ' + (i+1) + ' complete')
   }
 }
 
-var runGenerator = function (fn) {
+function runGenerator(fn) {
   return new Promise(function(resolve, reject){
     var next = function (err, arg) {
       if(err){
+        winston.log('error', 'Error copying images')
+        winston.log('error', err)
         return it.throw(err);
       }
 
@@ -108,12 +121,38 @@ var runGenerator = function (fn) {
   })
 }
 
+function writeVideo(){
+  var outputFrameRate = images.length/180
+  var inputFrameRate = 1/(180/images.length)
+  var outputFile = program.output+'video-'+pad('00000', images.length)+'.mp4';
+  var args = [
+    '-f', 'image2',
+    '-r', inputFrameRate,
+    '-i', './tmp/out%d.png',
+    '-y',
+    '-vcodec', 'libx264',
+    '-r', '24',
+    '-crf', '26',
+    '-movflags', 'faststart',
+    outputFile
+  ];
+  winston.log('info', 'Start compressing video');
+  winston.log('debug', 'command: ffmpeg '+ args.join(' '));
+  run_cmd(
+    'ffmpeg', args, false, function(text){
+      elapsedTime('Video encoding complete');
+      uploadVideo(outputFile);
+    }
+  );
+}
 
-walker.on("end", function () {
-  runGenerator(copyImagesGenerator).then(function(){
-    writeVideo()
-  })
-});
+function uploadVideo(filePath){
+  winston.log('info', 'Starting FTP upload '+filePath);
+  var args = [
+    '-f', filePath
+  ];
+  run_cmd('./ftp.sh', args, true, function(){});
+}
 
 function run_cmd(cmd, args, detached, callback ) {
   var spawn = require('child_process').spawn;
@@ -128,29 +167,13 @@ function run_cmd(cmd, args, detached, callback ) {
   child.stdout.on('error', function() { console.log('err') });
 }
 
-function writeVideo(){
-  var outputFrameRate = images.length/180
-  var inputFrameRate = 1/(180/images.length)
-  var args = [
-    '-f', 'image2',
-    '-r', inputFrameRate,
-    '-i', './tmp/out%d.png',
-    '-y',
-    '-vcodec', 'libx264',
-    '-r', '24',
-    '-crf', '26',
-    '-movflags', 'faststart',
-    program.output+'video-'+pad('00000', images.length)+'.mp4'
-  ];
-  console.log('command: ffmpeg '+ args.join(' '));
-  run_cmd(
-    'ffmpeg', args, function(text){
-      console.timeEnd('videoencoding')
-      console.log(text)
-    }
-  );
-}
-
 function pad(pad, str) {
   return (pad + str).slice(-pad.length);
+}
+
+function elapsedTime(note){
+  var precision = 3;
+  var elapsed = process.hrtime(startTime)[1] / 1000000;
+  winston.log('info', note + " - " + process.hrtime(startTime)[0] + "s, " + elapsed.toFixed(precision) + "ms");
+  startTime = process.hrtime();
 }
