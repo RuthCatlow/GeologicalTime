@@ -14,7 +14,7 @@ created for We Are Not Alone, 20/21 Gallery, Scunthorpe, January 2016
 `cd munge`  
 `npm install`
 
-**FTP credentials in .env**
+**FTP credentials in `munge/.env`**
 
 ```
 GTP_HOST=host
