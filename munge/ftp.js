@@ -1,6 +1,4 @@
-#!/usr/bin/env node
 'use strict';
-// vim: set ft=javascript:
 
 require('dotenv').load({path: __dirname+'/.env'});
 
@@ -9,18 +7,11 @@ var path = require('path');
 var winston = require('winston');
 var Client = require('ftp');
 
-winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp: true});
-
-program
-  .version('0.0.1')
-  .option('-f, --file [path]', 'File to upload', 'foo.txt')
-  .parse(process.argv);
-
-function ftpSend(){
+function ftpSend(file){
   winston.log('info', 'FTP client connecting');
-  winston.log('info', program.file);
+  winston.log('info', file);
 
-  var filename = path.basename(program.file)
+  var filename = path.basename(file)
   var options = {
     host: process.env.GTP_HOST,
     user: process.env.GTP_USER,
@@ -32,17 +23,17 @@ function ftpSend(){
   var c = new Client();
   c.on('ready', function() {
     winston.log('info', 'FTP client ready');
-    c.put(program.file, baseDirectory+'/videos/'+filename, function(err) {
+    c.put(file, baseDirectory+'/videos/'+filename, function(err) {
       if(err){
         winston.log('error', 'Error uploading: '+program.file);
         winston.log('error', JSON.stringify(err));
         throw err;
       }
-      winston.log('info', 'Successfully uploaded: '+program.file);
+      winston.log('info', 'Successfully uploaded: '+file);
       c.end();
     });
   });
 	c.connect(options);
 }
 
-ftpSend();
+module.exports = ftpSend;
