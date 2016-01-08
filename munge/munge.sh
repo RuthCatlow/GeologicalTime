@@ -11,13 +11,13 @@ var winston = require('winston');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
-var Client = require('ftp');
+// var ftp = require('./ftp');
 
-winston.add(winston.transports.File, {filename: 'munge.log', timestamp: true});
+winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
 program
   .version('0.0.1')
-  .option('-i, --input [path]', 'Change the image directory input (default:"images")', '../output/images/')
+  .option('-i, --input [path]', 'Change the image directory input (default:"images")', __dirname+'/../output/images/')
   .option('-v, --output [path]', 'Change the video output directory (default:"videos")', __dirname+'/../output/videos/')
   .parse(process.argv);
 
@@ -86,7 +86,7 @@ function* copyImagesGenerator(){
 
   images = images.reverse()
 
-  winston.log('info', 'Start copying images');
+  winston.log('info', 'Start copying images ('+images.length+')');
   while(i < slices){
     winston.log('debug', 'Image batch '+ (i+1) + ' start');
     var begin = i*sliceLength
@@ -136,32 +136,48 @@ function writeVideo(){
     '-movflags', 'faststart',
     outputFile
   ];
+  var config = {
+    detached : false,
+    stdio: ['pipe', 'pipe', 'pipe']
+  };
   winston.log('info', 'Start compressing video');
   winston.log('debug', 'command: ffmpeg '+ args.join(' '));
   run_cmd(
-    'ffmpeg', args, false, function(text){
-      elapsedTime('Video encoding complete');
+    'ffmpeg', args, config, function(text){
+      rmraf.sync('./tmp');
+      elapsedTime('Video encoding complete: '+filePath);
       uploadVideo(outputFile);
     }
   );
 }
 
 function uploadVideo(filePath){
-  winston.log('info', 'Starting FTP upload '+filePath);
+  // winston.log('info', 'Starting FTP upload '+filePath);
   var args = [
     '-f', filePath
   ];
-  run_cmd('./ftp.sh', args, true, function(){});
+  var config = {
+    detached : true,
+    stdio: ['ignore', 'ignore', 'ignore']
+  };
+  // winston.log('info', __dirname+'/ftp.sh');
+  // winston.log('info', JSON.stringify(args));
+  // ftp(filePath);
+  run_cmd(__dirname+'/ftp.sh', args, config, function(){});
+  //process.exit();
 }
 
-function run_cmd(cmd, args, detached, callback ) {
+function run_cmd(cmd, args, config, callback ) {
   var spawn = require('child_process').spawn;
-  var child = spawn(cmd, args, { detached : detached || false, stdio: ['pipe', 'pipe', 'pipe'] });
+  var child = spawn(cmd, args, config);
   var resp = "";
+
+  if(config.detached === true){
+    return;
+  }
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
   child.stdout.on('end', function() {
-    rmraf.sync('./tmp');
     callback('Written '+ images.length + ' images')
   });
   child.stdout.on('error', function() { console.log('err') });
