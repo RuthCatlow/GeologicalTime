@@ -13,3 +13,12 @@ created for We Are Not Alone, 20/21 Gallery, Scunthorpe, January 2016
 
 `cd munge`  
 `npm install`
+
+**FTP credentials in .env**
+
+```
+GTP_HOST=host
+GTP_USER=user
+GTP_PASSWORD=password
+GTP_BASE_DIR=path
+```
