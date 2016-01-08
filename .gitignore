@@ -14,6 +14,7 @@ foo.txt
 munge/images-source
 
 log.txt
+cam.txt
 
 output/images/*
 output/videos/*
