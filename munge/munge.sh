@@ -125,6 +125,8 @@ function writeVideo(){
   var outputFrameRate = images.length/180
   var inputFrameRate = 1/(180/images.length)
   var outputFile = program.output+'video-'+pad('00000', images.length)+'.mp4';
+  // Debug.
+  // uploadVideo(outputFile, images.length); return;
   var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
@@ -143,16 +145,16 @@ function writeVideo(){
   winston.log('info', 'Start compressing video');
   winston.log('debug', 'command: ffmpeg '+ args.join(' '));
   run_cmd(
-    'ffmpeg', args, config, function(text){
+    'ffmpeg', args, config, function(numFiles){
       rmraf.sync('./tmp');
-      elapsedTime('Video encoding complete: '+filePath);
-      uploadVideo(outputFile);
+      elapsedTime('Video encoding complete: '+outputFile);
+      uploadVideo(outputFile, numFiles);
     }
   );
 }
 
-function uploadVideo(filePath){
-  // winston.log('info', 'Starting FTP upload '+filePath);
+function uploadVideo(filePath, numFiles){
+  winston.log('info', 'Starting FTP upload '+filePath);
   var args = [
     '-f', filePath
   ];
@@ -160,11 +162,17 @@ function uploadVideo(filePath){
     detached : true,
     stdio: ['ignore', 'ignore', 'ignore']
   };
-  // winston.log('info', __dirname+'/ftp.sh');
-  // winston.log('info', JSON.stringify(args));
   // ftp(filePath);
-  run_cmd(__dirname+'/ftp.sh', args, config, function(){});
-  //process.exit();
+  // Write file count before
+  fs.writeFile(__dirname+"/count.json", JSON.stringify({count:numFiles}), function(err) {
+    if(err) {
+      winston.log('error', err);
+      return
+    }
+    winston.log("info", "Count file was saved");
+    run_cmd(__dirname+'/ftp.sh', args, config, function(){});
+    process.exit();
+  });
 }
 
 function run_cmd(cmd, args, config, callback ) {
@@ -178,7 +186,7 @@ function run_cmd(cmd, args, config, callback ) {
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
   child.stdout.on('end', function() {
-    callback('Written '+ images.length + ' images')
+    callback(images.length)
   });
   child.stdout.on('error', function() { console.log('err') });
 }

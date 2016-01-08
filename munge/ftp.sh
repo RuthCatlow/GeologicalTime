@@ -33,16 +33,27 @@ function ftpSend(){
   c.on('ready', function() {
     winston.log('info', 'FTP client ready');
     c.put(program.file, baseDirectory+'/videos/'+filename, function(err) {
-      if(err){
-        winston.log('error', 'Error uploading: '+program.file);
-        winston.log('error', JSON.stringify(err));
-        throw err;
-      }
+
+      if(err) logError(program.file, err);
       winston.log('info', 'Successfully uploaded: '+program.file);
-      c.end();
+
+      // If successful then upload count.json.
+      c.put(__dirname+'/count.json', baseDirectory+'/count.json', function(err) {
+
+        if(err) logError('count.json', err);
+        winston.log('info', 'Successfully uploaded: count.json');
+
+        c.end();
+      });
     });
   });
 	c.connect(options);
+}
+
+function logError(file, err){
+  winston.log('error', 'Error uploading: '+file);
+  winston.log('error', JSON.stringify(err));
+  throw err;
 }
 
 ftpSend();
