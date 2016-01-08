@@ -39,7 +39,7 @@ void drawLargeCountdown(int seconds) {
   // stroke(255);
   // line(0, base, width, base);
 
-  int fontSize = 200;
+  int fontSize = 500;
   PFont openSans;
   openSans = createFont("OpenSans-Bold.ttf", fontSize);
   textFont(openSans, fontSize);
