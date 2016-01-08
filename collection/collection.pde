@@ -11,6 +11,7 @@ String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
 String outputDirectory = "../output/images/";
 int cameraIndex = 14;
+int outputImageWidth = 720;
 
 long mostRecent;
 int camScreenHeight = 0;
@@ -58,8 +59,13 @@ void setup() {
     cam.start();
   }
   
-  int camWidth = 1280;
-  int camHeight = 720;
+  // Extract camera resolution from capture string.
+  int q = cameras[cameraIndex].indexOf("size=");
+  int r = cameras[cameraIndex].indexOf("x");
+  int s = cameras[cameraIndex].indexOf(",fps");
+  int camWidth = int(cameras[cameraIndex].substring(q+5, r));
+  int camHeight = int(cameras[cameraIndex].substring(r  +1, s));
+  
   float ratio = width/float(camWidth);
   camScreenHeight = round(camHeight*ratio);
   camScreenY = (height - camScreenHeight)/2;
@@ -77,12 +83,11 @@ void draw() {
   }
   
   // Render on screen
-  image(cam, 0, 0, width, camScreenHeight);
-  //PImage img = createImage(66, 66, RGB);
-
+  image(cam, 0, camScreenY, width, camScreenHeight);
+  
   Date d = new Date();
   long currentTime = d.getTime()/1000; // in seconds
-  int timeout = 60*1; // x minutes in seconds.
+  int timeout = 60*3; // x minutes in seconds.
 
   int countdownSeconds = round(timeout-currentTime%timeout);
   //println(countdownSeconds);
@@ -94,8 +99,16 @@ void draw() {
     String directory = year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
     // Store this minute so we don't continually take more images.
     mostRecent = currentTime;
+    
+    // Resize cam image to desired width. 
+    float ratio = camScreenHeight/float(width);
+    int outputImageHeight = round(outputImageWidth*(ratio));
+    PImage img = createImage(outputImageWidth, outputImageHeight, RGB);
+    img.copy(cam, 0, camScreenY, width, camScreenHeight, 0, 0, outputImageWidth, outputImageHeight);
+  
     // Save image with 'year-date-month' directory and 'hour-min' file. 
-    saveFrame(outputDirectory+directory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
+    img.save(outputDirectory+directory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
+    
     log = createWriter(logFilename);
     log.println(mostRecent);
     log.flush(); 
