@@ -89,7 +89,7 @@ function setVideo(){
 
 function onVideoEnd(){
   count++;
-  setVideo();
+  getCurrentCount();
 }
 
 function pad(pad, str) {
