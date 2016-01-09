@@ -11,17 +11,20 @@ var winston = require('winston');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
-/// var ftp = require('./ftp');
+// var ftp = require('./ftp');
 
 winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
 program
   .version('0.0.1')
+  .option('-i, --input [path]', 'Specify an input directory')
   .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
   .parse(process.argv);
 
+var inputDirectory = program.input || program.output + '/images/';
+
 var images = [];
-var walker = walk.walk(program.output + '/images/', {
+var walker = walk.walk(inputDirectory, {
   followLinks: false,
   filters: ["Temp", "_Temp", ".git", ".gitkeep"]
 });
@@ -56,7 +59,7 @@ walker.on("files", function (root, stats, next) {
 walker.on("end", function () {
   runGenerator(copyImagesGenerator).then(function(){
     winston.log('info', 'Images copied')
-    writeVideo()
+    writeVideo();
   })
 });
 
@@ -65,12 +68,12 @@ function copyImagesToTmp(files, startIndex){
   return function(callback){
     files.forEach(function(file, i){
       var fileIndex = i+startIndex;
-      var outFilename = util.format(outFilenameTpl, fileIndex)
+      var outFilename = util.format(outFilenameTpl, fileIndex);
       var stream = fs.createReadStream(file).pipe(fs.createWriteStream(outFilename));
       stream.on('finish', function(){
         stream.destroy();
         if(i == files.length-1){
-          callback(null, startIndex)
+          callback(null, startIndex);
         }
       })
     })
@@ -78,22 +81,22 @@ function copyImagesToTmp(files, startIndex){
 }
 
 function* copyImagesGenerator(){
-  var sliceLength = 1000
-  var slices = Math.ceil(images.length/sliceLength)
-  var slice = []
-  var i = 0
+  var sliceLength = 1000;
+  var slices = Math.ceil(images.length/sliceLength);
+  var slice = [];
+  var i = 0;
 
-  images = images.reverse()
+  images = images.reverse();
 
   winston.log('info', 'Start copying images ('+images.length+')');
   while(i < slices){
     winston.log('debug', 'Image batch '+ (i+1) + ' start');
-    var begin = i*sliceLength
+    var begin = i*sliceLength;
     var end = (i+1)*sliceLength;
-    slice = (i < slices-1) ? images.slice(begin, end) : images.slice(begin)
-    yield copyImagesToTmp(slice, begin)
-    i++
-    winston.log('debug', 'Image batch ' + (i+1) + ' complete')
+    slice = (i < slices-1) ? images.slice(begin, end) : images.slice(begin);
+    yield copyImagesToTmp(slice, begin);
+    i++;
+    winston.log('debug', 'Image batch ' + (i+1) + ' complete');
   }
 }
 
@@ -101,8 +104,8 @@ function runGenerator(fn) {
   return new Promise(function(resolve, reject){
     var next = function (err, arg) {
       if(err){
-        winston.log('error', 'Error copying images')
-        winston.log('error', err)
+        winston.log('error', 'Error copying images');
+        winston.log('error', err);
         return it.throw(err);
       }
 
@@ -121,8 +124,8 @@ function runGenerator(fn) {
 }
 
 function writeVideo(){
-  var outputFrameRate = images.length/180
-  var inputFrameRate = 1/(180/images.length)
+  var outputFrameRate = images.length/180;
+  var inputFrameRate = 1/(180/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
   // Debug.
   // uploadVideo(outputFile, images.length); return;
@@ -132,8 +135,10 @@ function writeVideo(){
     '-i', './tmp/out%d.png',
     '-y',
     '-vcodec', 'libx264',
+		// Won't play in Android browser without this.
 		'-pix_fmt', 'yuv420p',
-    '-r', '24',
+		// Solves 'height not divisible by 2' error. http://stackoverflow.com/a/29582287/970059
+		'-vf', 'scale=720:-2',
     '-crf', '26',
     '-movflags', 'faststart',
     outputFile
@@ -143,7 +148,7 @@ function writeVideo(){
     stdio: ['pipe', 'pipe', 'pipe']
   };
   winston.log('info', 'Start compressing video');
-  winston.log('debug', 'command: ffmpeg '+ args.join(' '));
+  winston.log('info', 'command: ffmpeg '+ args.join(' '));
   run_cmd(
     'ffmpeg', args, config, function(numFiles){
       // rmraf.sync('./tmp');
@@ -186,7 +191,7 @@ function run_cmd(cmd, args, config, callback ) {
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
   child.stdout.on('end', function() {
-    callback(images.length)
+    callback(images.length);
   });
   child.stdout.on('error', function() { console.log('err') });
 }
