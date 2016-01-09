@@ -11,9 +11,14 @@
   "license": "ISC",
   "devDependencies": {
     "css-loader": "^0.23.1",
+    "dotenv": "^1.2.0",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "gulp": "^3.9.0",
+    "gulp-util": "^3.0.7",
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.7",
     "video.js": "^5.4.6",
+    "vinyl-ftp": "^0.4.5",
     "webpack": "^1.12.10",
     "webpack-dev-server": "^1.14.0"
   },

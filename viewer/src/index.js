@@ -17,6 +17,8 @@ $(document).ready(function(){
 
   player = videojs("gtp-video", config);
   player.ready(function(){
+    var $playButton = $('.gtp-js-play');
+
     // Pause because nothing to load yet.
     player.pause();
     // Set dimensions
@@ -27,16 +29,21 @@ $(document).ready(function(){
     // Player event - loadeddata/video ready.
     player.on('loadeddata', function(){
       player.play();
+
+      $playButton.on('click', function(){
+        player.play();
+      });
+      console.log('loadeddata');
+
       // Debug
       // player.currentTime(160);
     });
 
     // Player event - timeupdate/progress
-    /*
     player.on('timeupdate', function(e){
       console.log(player.currentTime());
+      $playButton.addClass('gtp-btn-play--hidden');
     });
-    */
 
     // Player event - ended/restart
     player.on('ended', onVideoEnd);
@@ -46,6 +53,7 @@ $(document).ready(function(){
     $fsButton.on('click', function(){
       player.requestFullscreen();
     });
+
 
     // Event - Window resize
     $(window).resize(function(){
@@ -71,11 +79,17 @@ function getCurrentCount(){
       // count = 324;
       count = data.count;
       setVideo();
+      updateImageCount();
     },
     error: function(xhr, type){
       console.error('Ajax error!')
     }
   })
+}
+
+function updateImageCount(){
+  var images = pad('00000', count);
+  $('.gtp-js-count').text(images);
 }
 
 function setVideo(){
