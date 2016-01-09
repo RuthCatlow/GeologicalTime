@@ -14,6 +14,7 @@ winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp:
 program
   .version('0.0.1')
   .option('-f, --file [path]', 'File to upload', 'foo.txt')
+  .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
   .parse(process.argv);
 
 function ftpSend(){
@@ -38,7 +39,7 @@ function ftpSend(){
       winston.log('info', 'Successfully uploaded: '+program.file);
 
       // If successful then upload count.json.
-      c.put(__dirname+'/count.json', baseDirectory+'/count.json', function(err) {
+      c.put(program.output+'/count.json', baseDirectory+'/count.json', function(err) {
 
         if(err) logError('count.json', err);
         winston.log('info', 'Successfully uploaded: count.json');

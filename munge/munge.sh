@@ -11,18 +11,17 @@ var winston = require('winston');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
-// var ftp = require('./ftp');
+/// var ftp = require('./ftp');
 
 winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
 program
   .version('0.0.1')
-  .option('-i, --input [path]', 'Change the image directory input (default:"images")', __dirname+'/../output/images/')
-  .option('-v, --output [path]', 'Change the video output directory (default:"videos")', __dirname+'/../output/videos/')
+  .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
   .parse(process.argv);
 
 var images = [];
-var walker = walk.walk(program.input, {
+var walker = walk.walk(program.output + '/images/', {
   followLinks: false,
   filters: ["Temp", "_Temp", ".git", ".gitkeep"]
 });
@@ -124,7 +123,7 @@ function runGenerator(fn) {
 function writeVideo(){
   var outputFrameRate = images.length/180
   var inputFrameRate = 1/(180/images.length)
-  var outputFile = program.output+'video-'+pad('00000', images.length)+'.mp4';
+  var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
   // Debug.
   // uploadVideo(outputFile, images.length); return;
   var args = [
@@ -133,6 +132,7 @@ function writeVideo(){
     '-i', './tmp/out%d.png',
     '-y',
     '-vcodec', 'libx264',
+		'-pix_fmt', 'yuv420p',
     '-r', '24',
     '-crf', '26',
     '-movflags', 'faststart',
@@ -146,7 +146,7 @@ function writeVideo(){
   winston.log('debug', 'command: ffmpeg '+ args.join(' '));
   run_cmd(
     'ffmpeg', args, config, function(numFiles){
-      rmraf.sync('./tmp');
+      // rmraf.sync('./tmp');
       elapsedTime('Video encoding complete: '+outputFile);
       uploadVideo(outputFile, numFiles);
     }
@@ -164,7 +164,7 @@ function uploadVideo(filePath, numFiles){
   };
   // ftp(filePath);
   // Write file count before
-  fs.writeFile(__dirname+"/count.json", JSON.stringify({count:numFiles}), function(err) {
+  fs.writeFile(program.output + "/count.json", JSON.stringify({count:numFiles}), function(err) {
     if(err) {
       winston.log('error', err);
       return
