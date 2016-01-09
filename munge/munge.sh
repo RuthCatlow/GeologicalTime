@@ -86,7 +86,8 @@ function* copyImagesGenerator(){
   var slice = [];
   var i = 0;
 
-  images = images.reverse();
+	// Reversing starts with the first image.
+  // images = images.reverse();
 
   winston.log('info', 'Start copying images ('+images.length+')');
   while(i < slices){
