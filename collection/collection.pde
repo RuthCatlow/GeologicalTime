@@ -97,7 +97,7 @@ void draw() {
   // Countdown calc.
   Date d = new Date();
   long currentTime = d.getTime()/1000;
-  int timeout = 15;
+  int timeout = 180;
   timeout++; // Add 1 so we can go down to zero.
     
    println(round(millis()/1000) + " < " + round((delayTime + delayForMs)/1000)); 
