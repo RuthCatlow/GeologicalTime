@@ -41,10 +41,18 @@ body {
 .gtp-image-count {
   position: absolute;
   right: 20px;
-  bottom: 20px;
+  bottom: 10px;
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-weight: bold;
+}
+
+.gtp-scale {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
 }
 
 button {

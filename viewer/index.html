@@ -6,18 +6,20 @@
     <title>Geological Time Piece</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-		<link href="dist/styles.css" media="all" rel="stylesheet" />
+    <link href="dist/styles.css" media="all" rel="stylesheet" />
     <script type="text/javascript" src="dist/bundle.js" charset="utf-8"></script>
 
   </head>
   <body>
     <div class="gtp-wrapper">
-			<video id="gtp-video" class="video-js vjs-default-skin" width="640" height="264">
-				<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
-			</video>
-			<button class="gtp-js-play gtp-btn-play">START</button>
-			<button class="gtp-js-fullscreen gtp-btn-fullscreen">Fullscreen</button>
-			<div class="gtp-image-count">Count <span class="gtp-js-count"></span></div>
+      <video id="gtp-video" class="video-js vjs-default-skin" width="640" height="264">
+        <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+      </video>
+      <button class="gtp-js-play gtp-btn-play">START</button>
+      <button class="gtp-js-fullscreen gtp-btn-fullscreen">Fullscreen</button>
+      <div class="gtp-image-count"><span class="gtp-js-count"></span></div>
     </div>
+    <canvas class="gtp-js-scale gtp-scale" id="scale" width="5"></canvas>
+
   </body>
 </html>

@@ -1,8 +1,10 @@
-require("./style.css");
-require("video.js/dist/video-js.css")
+require('./style.css');
+require('video.js/dist/video-js.css')
 var videojs = require('video.js');
 
 var $ = require('npm-zepto');
+// var scale = require('./scale');
+var playhead = require('./playhead');
 
 var player = {};
 var count = 0;
@@ -36,13 +38,14 @@ $(document).ready(function(){
       console.log('loadeddata');
 
       // Debug
-      // player.currentTime(160);
+      // player.currentTime(170);
     });
 
     // Player event - timeupdate/progress
     player.on('timeupdate', function(e){
-      console.log(player.currentTime());
+      // console.log(player.currentTime());
       $playButton.addClass('gtp-btn-play--hidden');
+      playhead.updateTime(player.currentTime(), player.duration());
     });
 
     // Player event - ended/restart
@@ -51,7 +54,8 @@ $(document).ready(function(){
     // Event - Fullscreen button.
     var $fsButton = $('.gtp-js-fullscreen');
     $fsButton.on('click', function(){
-      player.requestFullscreen();
+      // player.requestFullscreen();
+      launchFullscreen(document.documentElement);
     });
 
 
@@ -80,6 +84,7 @@ function getCurrentCount(){
       count = data.count;
       setVideo();
       updateImageCount();
+      // scale.updateCount(10);
     },
     error: function(xhr, type){
       console.error('Ajax error!')
@@ -109,3 +114,26 @@ function onVideoEnd(){
 function pad(pad, str) {
   return (pad + str).slice(-pad.length);
 }
+
+function launchFullscreen(element) {
+  if(element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if(element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
+  } else if(element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if(element.msRequestFullscreen) {
+    element.msRequestFullscreen();
+  }
+}
+
+function exitFullscreen() {
+  if(document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if(document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if(document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
