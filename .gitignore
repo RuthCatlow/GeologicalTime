@@ -16,7 +16,8 @@ munge/images-source
 log.txt
 cams.txt
 count.json
-tmp/
+munge/tmp/
+output/tmp/*.png
 
 output/images/*
 output/videos/*

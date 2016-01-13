@@ -100,31 +100,28 @@ void draw() {
   int timeout = 180;
   timeout++; // Add 1 so we can go down to zero.
     
-   println(round(millis()/1000) + " < " + round((delayTime + delayForMs)/1000)); 
   // Delay after image is saved.
   if (delayTime > 0 && millis() < delayTime + delayForMs) {
     // Render latest save images on screen for delay (freeze frame).   
-    // image(cam, 0, camScreenY, width, camScreenHeight);
-    image(latestImage, 0, camScreenY, 1280, 720);
+    image(latestImage, 0, camScreenY, width, camScreenHeight);
     return;
   }    
   
   // Render cam on screen
-  image(cam, 0, camScreenY, 1280, 720);
- 
+  image(cam, 0, camScreenY, width, camScreenHeight);
+
   int countdownSeconds = round(timeout-currentTime%timeout);
   if(countdownSeconds <= 3){
     drawCircle();
     drawLargeCountdown(countdownSeconds);
   } else if(countdownSeconds <= timeout-round(delayForMs/1000)){
     drawCountdown(countdownSeconds);
-    drawImageCount(imageCount);
+    drawImageCount(imageCount+1);
   }
     
   // Have we passed the most recent stored time and is this time
   // divisible by {timeout} seconds?
   if (currentTime > mostRecent && currentTime%timeout == 0) {
-    String directory = "images/" + year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
     // Store this minute so we don't continually take more images.
     mostRecent = currentTime;
 
@@ -134,19 +131,24 @@ void draw() {
     latestImage = createImage(outputImageWidth, outputImageHeight, RGB);
     latestImage.copy(cam, 0, camScreenY, width, camScreenHeight, 0, 0, outputImageWidth, outputImageHeight);
 
-    // Save image with 'year-date-month' directory and 'hour-min' file. 
-    latestImage.save(outputDirectory+directory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
+    imageCount++;
 
+    // Save image with 'year-date-month' directory and 'hour-min' file. 
+    String dateDirectory = outputDirectory+"images/" + year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
+    latestImage.save(dateDirectory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
+    // Save image into tmp directory for copying.
+    String copyDirectory = outputDirectory+"tmp/";
+    latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
+  
     // Save most recent time in case of crash.
     log = createWriter(logFilename);
     log.println(mostRecent);
     log.flush(); 
     log.close();
-    
-    imageCount++;
 
     delayTime = millis();
 
+/*
     try { 
       Process tr = Runtime.getRuntime().exec(sketchPath()+"/../munge/munge.sh");
       BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
@@ -156,5 +158,6 @@ void draw() {
     catch (IOException e) {
       println(e);
     }
+    */
   }
 }
