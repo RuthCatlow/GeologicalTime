@@ -11,7 +11,6 @@ var winston = require('winston');
 var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
-// var ftp = require('./ftp');
 
 winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
@@ -24,116 +23,31 @@ program
 
 var inputDirectory = program.input || program.output + '/images/';
 
-var images = [];
-var walker = walk.walk(inputDirectory, {
-  followLinks: false,
-  filters: ["Temp", "_Temp", ".git", ".gitkeep"]
-});
 var startTime = process.hrtime();
+var images = fileList(program.output+'/tmp');
+writeVideo();
 
-var mkdirSync = function (path) {
-  try {
-    fs.mkdirSync(path);
-  } catch(e) {
-    if ( e.code != 'EEXIST' ) throw e;
-  }
+function fileList(dir) {
+  return fs.readdirSync(dir).reduce(function(list, file) {
+    var name = [dir, file].join('/');
+		if(['png', 'jpg', 'jpeg'].indexOf(file.split('.').pop().toLowerCase()) === -1){
+			return list;
+		}
+    var isDir = fs.statSync(name).isDirectory();
+    return list.concat(isDir ? fileList(name) : [name]);
+  }, []);
 }
 
-// Make empty tmp directory
-rmraf.sync('./tmp');
-mkdirSync('./tmp');
-
-walker.on("files", function (root, stats, next) {
-  var nextImages = stats.map(function(file){
-    return root + '/' + file.name;
-  })
-  // Filter out anything but jpgs
-  nextImages = nextImages.filter(function(file){
-    return ['png', 'jpg', 'jpeg'].indexOf(file.split('.').pop().toLowerCase()) > -1;
-  });
-  winston.log('debug', 'Amount of images: ' + nextImages.length)
-
-  images = images.concat(nextImages.reverse());
-  next();
-});
-
-walker.on("end", function () {
-  runGenerator(copyImagesGenerator).then(function(){
-    winston.log('info', 'Images copied')
-    writeVideo();
-  })
-});
-
-function copyImagesToTmp(files, startIndex){
-  var outFilenameTpl = './tmp/out%d.png'
-  return function(callback){
-    files.forEach(function(file, i){
-      var fileIndex = i+startIndex;
-      var outFilename = util.format(outFilenameTpl, fileIndex);
-      var stream = fs.createReadStream(file).pipe(fs.createWriteStream(outFilename));
-      stream.on('finish', function(){
-        stream.destroy();
-        if(i == files.length-1){
-          callback(null, startIndex);
-        }
-      })
-    })
-  }
-}
-
-function* copyImagesGenerator(){
-  var sliceLength = 1000;
-  var slices = Math.ceil(images.length/sliceLength);
-  var slice = [];
-  var i = 0;
-
-	// Reversing starts with the first image.
-  // images = images.reverse();
-
-  winston.log('info', 'Start copying images ('+images.length+')');
-  while(i < slices){
-    winston.log('debug', 'Image batch '+ (i+1) + ' start');
-    var begin = i*sliceLength;
-    var end = (i+1)*sliceLength;
-    slice = (i < slices-1) ? images.slice(begin, end) : images.slice(begin);
-    yield copyImagesToTmp(slice, begin);
-    i++;
-    winston.log('debug', 'Image batch ' + (i+1) + ' complete');
-  }
-}
-
-function runGenerator(fn) {
-  return new Promise(function(resolve, reject){
-    var next = function (err, arg) {
-      if(err){
-        winston.log('error', 'Error copying images');
-        winston.log('error', err);
-        return it.throw(err);
-      }
-
-      var result = it.next(arg);
-      if(result.done){
-        resolve();
-      }
-
-      if (typeof result.value == 'function') {
-        result.value(next);
-      }
-    }
-    var it = fn();
-    next();
-  })
-}
 
 function writeVideo(){
-  // var outputFrameRate = images.length/180;
+	var  minOutFrameRate = 24;
   var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
 	// http://stackoverflow.com/a/24697998/970059
   var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
-    '-i', './tmp/out%d.png',
+    '-i', program.output+'/tmp/out%d.png',
     '-y',
     '-vcodec', 'libx264',
 		// Won't play in Android browser without this.
@@ -144,23 +58,28 @@ function writeVideo(){
     '-movflags', 'faststart',
     outputFile
   ];
+	// Ensure min out frame rate of {minOutFrameRate}
+	if(images.length < program.duration*minOutFrameRate){
+		args.splice(-1, 0, '-r', minOutFrameRate);
+	}
   var config = {
     detached : false,
     stdio: ['pipe', 'pipe', 'pipe']
   };
-  winston.log('info', 'Start compressing video');
+  winston.log('info', 'Start encoding');
   winston.log('info', 'command: ffmpeg '+ args.join(' '));
   run_cmd(
     'ffmpeg', args, config, function(numFiles){
-      // rmraf.sync('./tmp');
-      elapsedTime('Video encoding complete: '+outputFile);
-      uploadVideo(outputFile, numFiles);
+      var secs = elapsedTime();
+  		winston.log('info', 'Encoding complete: ' +outputFile);
+  		winston.log('info', 'Complete in ' + secs  + 's');
+      uploadVideo(outputFile, numFiles, secs);
     }
   );
 }
 
-function uploadVideo(filePath, numFiles){
-  winston.log('info', 'Starting FTP upload '+filePath);
+function uploadVideo(filePath, numFiles, time){
+  winston.log('info', 'Starting upload: '+filePath);
   var args = [
     '-f', filePath
   ];
@@ -170,12 +89,12 @@ function uploadVideo(filePath, numFiles){
   };
   // ftp(filePath);
   // Write file count before
-  fs.writeFile(program.output + "/count.json", JSON.stringify({count:numFiles}), function(err) {
+  fs.writeFile(program.output + "/count.json", JSON.stringify({count:numFiles, time: time }), function(err) {
     if(err) {
       winston.log('error', err);
       return
     }
-    winston.log("info", "Count file was saved");
+    winston.log("info", "Count file saved");
     run_cmd(__dirname+'/ftp.sh', args, config, function(){});
     process.exit();
   });
@@ -201,9 +120,8 @@ function pad(pad, str) {
   return (pad + str).slice(-pad.length);
 }
 
-function elapsedTime(note){
-  var precision = 3;
-  var elapsed = process.hrtime(startTime)[1] / 1000000;
-  winston.log('info', note + " - " + process.hrtime(startTime)[0] + "s, " + elapsed.toFixed(precision) + "ms");
+function elapsedTime(){
+  var elapsedSeconds = process.hrtime(startTime)[0];
   startTime = process.hrtime();
+	return elapsedSeconds;
 }
