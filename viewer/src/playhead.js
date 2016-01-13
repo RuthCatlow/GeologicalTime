@@ -4,7 +4,8 @@ var canvas = null;
 var ctx = null;
 var current = 1;
 var total = 180;
-var bgColour = hexToRgbString('#1f948b', 0.5);
+var barWidth = 10;
+var bgColour = hexToRgbString('#444444', 1);
 
 function resizeCanvas() {
   canvas.height = window.innerHeight;
@@ -14,23 +15,30 @@ function resizeCanvas() {
 function step() {
   var height = window.innerHeight;
   var pos = current/total;
+  var pointX = canvas.width-barWidth-5;
+  var pointSize = 6;
 
   ctx.lineWidth = 2;
   ctx.fillStyle = bgColour;
   ctx.strokeStyle = "rgba(255, 0, 0, 1)";
-  ctx.clearRect(pos*height, height, canvas.width, height);
-  ctx.fillRect(0, 0, canvas.width, height);
+  ctx.clearRect(0, 0, canvas.width, height);
+  ctx.fillRect(canvas.width-barWidth, 0, barWidth, height);
 
   ctx.beginPath();
-  ctx.moveTo(0, pos*height);
-  ctx.lineTo(canvas.width, pos*height);
+  ctx.fillStyle = "rgba(255, 0, 0, 1)";
+  ctx.moveTo(pointX, pos*height);
+  ctx.lineTo(pointX-pointSize, pos*height+pointSize);
+  ctx.lineTo(pointX-pointSize, pos*height-pointSize);
+  ctx.fill();
+
+  ctx.moveTo(canvas.width-barWidth, pos*height+1);
+  ctx.lineTo(canvas.width, pos*height+1);
   ctx.stroke();
 
   window.requestAnimationFrame(step);
 }
 
 function updateTime(next, duration){
-  console.log(next);
   current = next;
   total = duration;
 }

@@ -6,10 +6,14 @@ var $ = require('npm-zepto');
 // var scale = require('./scale');
 var playhead = require('./playhead');
 
-var player = {};
+var player = null;
+var playerStill = null;
 var count = 0;
+var fullscreenBodyClass = 'is-fullscreen';
 
 $(document).ready(function(){
+
+	fullscreenEvents();
 
   var config = {
     controls : false,
@@ -17,59 +21,75 @@ $(document).ready(function(){
     preload : "auto"
   };
 
+  if($('#gtp-video-still').length){
+    playerStill = videojs("gtp-video-still", config)
+    playerStill.ready(function(){
+      playerStill.on('loadeddata', function(){
+        // playerStill.pause();
+        // playerStill.currentTime(0);
+      });
+      // Set dimensions
+      setPlayerDimensions(playerStill);
+      // Event - Window resize
+      $(window).resize(function(){
+        setPlayerDimensions(playerStill);
+      })
+    });
+  }
+
+  var $playButton = $('.gtp-js-play');
+  var $fsButton = $('.gtp-js-fullscreen');
+
   player = videojs("gtp-video", config);
   player.ready(function(){
-    var $playButton = $('.gtp-js-play');
-
     // Pause because nothing to load yet.
     player.pause();
     // Set dimensions
     setPlayerDimensions(player);
     // Get count.
     getCurrentCount();
+  });
 
-    // Player event - loadeddata/video ready.
-    player.on('loadeddata', function(){
-      player.play();
+  // Player event - loadeddata/video ready.
+  player.on('loadeddata', function(){
+    player.play();
+  });
 
-      $playButton.on('click', function(){
-        player.play();
-      });
-      console.log('loadeddata');
+  player.on('timeupdate', function(e){
+    // console.log(player.currentTime());
+    $playButton.addClass('gtp-btn-play--hidden');
+    playhead.updateTime(player.currentTime(), player.duration());
+  });
 
-      // Debug
-      // player.currentTime(170);
-    });
+  // Player event - ended/restart
+  player.on('ended', onVideoEnd);
 
-    // Player event - timeupdate/progress
-    player.on('timeupdate', function(e){
-      // console.log(player.currentTime());
-      $playButton.addClass('gtp-btn-play--hidden');
-      playhead.updateTime(player.currentTime(), player.duration());
-    });
+  $(window).resize(function(){
+    setPlayerDimensions(player);
+  })
 
-    // Player event - ended/restart
-    player.on('ended', onVideoEnd);
-
-    // Event - Fullscreen button.
-    var $fsButton = $('.gtp-js-fullscreen');
-    $fsButton.on('click', function(){
+  $fsButton.on('click', function(){
+		$('body').addClass(fullscreenBodyClass);
+    if(window.ENV === 'gallery'){
       // player.requestFullscreen();
       launchFullscreen(document.documentElement);
-    });
-
-
-    // Event - Window resize
-    $(window).resize(function(){
-      setPlayerDimensions(player);
-    })
-
+    } else {
+      player.requestFullscreen();
+		}
   });
+
+  $playButton.on('click', function(){
+    player.play();
+  });
+
 });
 
 function setPlayerDimensions(player){
-  player.width($(window).width());
-  player.height($(window).height());
+  var el = player.el().parentNode;
+  var style = window.getComputedStyle(el, null);
+  // console.log(style);
+  player.width(el.offsetWidth);
+  player.height(style.height);
 }
 
 function getCurrentCount(){
@@ -84,12 +104,29 @@ function getCurrentCount(){
       count = data.count;
       setVideo();
       updateImageCount();
-      // scale.updateCount(10);
     },
     error: function(xhr, type){
       console.error('Ajax error!')
     }
   })
+}
+
+function fullscreenEvents(){
+	if (document.addEventListener){
+		document.addEventListener('webkitfullscreenchange', fullscreenEventHandler, false);
+		document.addEventListener('mozfullscreenchange', fullscreenEventHandler, false);
+		document.addEventListener('fullscreenchange', fullscreenEventHandler, false);
+		document.addEventListener('MSFullscreenChange', fullscreenEventHandler, false);
+	}
+}
+
+function fullscreenEventHandler(){
+	// console.log('event', document.webkitIsFullScreen);
+	if (document.webkitIsFullScreen === false || document.mozFullScreen  ===  false || document.msFullscreenElement === false ){
+		$('body').removeClass(fullscreenBodyClass);
+	} else {
+		$('body').addClass(fullscreenBodyClass);
+	}
 }
 
 function updateImageCount(){
@@ -104,6 +141,13 @@ function setVideo(){
     { type: "video/mp4", src: filename }
   ]);
   player.load();
+
+  if(playerStill){
+    playerStill.src([
+      { type: "video/mp4", src: filename }
+    ]);
+    playerStill.load();
+  }
 }
 
 function onVideoEnd(){
