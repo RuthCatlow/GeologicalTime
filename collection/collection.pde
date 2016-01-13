@@ -1,4 +1,5 @@
 import java.io.InputStreamReader;
+import java.io.File;
 import java.util.Date;
 import processing.video.*;
 
@@ -10,9 +11,16 @@ Capture cam;
 String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
 String outputDirectory = "../output/";
+
+int imageIntervalShort = 180;                  // seconds
+int imageIntervalLong = 360;                   // seconds
+int imageInterval = imageIntervalShort;        // seconds
+int overThresholdCount = 0;
+
+int freezeDuration = 3000;                     // milliseconds
+
 int cameraIndex = 14;
 int outputImageWidth = 720;
-int delayForMs = 3000;
 
 long mostRecent;
 int camScreenHeight = 0;
@@ -20,15 +28,15 @@ int camScreenY = 0;
 long delayTime = 0;
 PImage latestImage;
 int imageCount = 0;
+int encodingTime = 0;
 
 void settings() {
-  fullScreen();
+	fullScreen();
 }
 
 void setup() {
   background(0);
-  // size(1280, 720);
-
+  
   String[] cameras = Capture.list();
   String mostRecentLog;
 
@@ -74,12 +82,36 @@ void setup() {
   float ratio = width/float(camWidth);
   camScreenHeight = round(camHeight*ratio);
   camScreenY = (height - camScreenHeight)/2;
+  
+  getJson();
+  
+  // println(0 + " " + camScreenY + " " + width  + " " + camScreenHeight);
+}
 
-  JSONObject json = loadJSONObject(outputDirectory+"count.json");
-  if(json.isNull("count") == false){
-    imageCount = json.getInt("count");
+void getJson(){
+  JSONObject json = null;
+  File jsonFile = new File(outputDirectory+"count.json");
+  if(jsonFile.exists() == true){
+    json = loadJSONObject(outputDirectory+"count.json");
   }
-  println(0 + " " + camScreenY + " " + width  + " " + camScreenHeight);
+  
+  if(json == null){
+    imageCount = 0;
+    encodingTime = 0;
+  } else {
+    imageCount = json.getInt("count");
+    encodingTime = json.getInt("time");
+  }
+  
+  // Check encoding isn't getting too close to our
+  // interval time.
+  if(encodingTime > round(imageIntervalShort*0.8)){
+    overThresholdCount++;
+  }
+   //<>//
+  if(overThresholdCount > 5){
+    imageInterval = imageIntervalLong;
+  }
 }
 
 void draw() {
@@ -97,11 +129,11 @@ void draw() {
   // Countdown calc.
   Date d = new Date();
   long currentTime = d.getTime()/1000;
-  int timeout = 180;
+  int timeout = imageInterval;
   timeout++; // Add 1 so we can go down to zero.
     
   // Delay after image is saved.
-  if (delayTime > 0 && millis() < delayTime + delayForMs) {
+  if (delayTime > 0 && millis() < delayTime + freezeDuration) {
     // Render latest save images on screen for delay (freeze frame).   
     image(latestImage, 0, camScreenY, width, camScreenHeight);
     return;
@@ -109,12 +141,12 @@ void draw() {
   
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
-
+  
   int countdownSeconds = round(timeout-currentTime%timeout);
   if(countdownSeconds <= 3){
     drawCircle();
     drawLargeCountdown(countdownSeconds);
-  } else if(countdownSeconds <= timeout-round(delayForMs/1000)){
+  } else if(countdownSeconds <= timeout-round(freezeDuration/1000)){
     drawCountdown(countdownSeconds);
     drawImageCount(imageCount+1);
   }
@@ -147,7 +179,6 @@ void draw() {
     log.close();
 
     delayTime = millis();
-
 /*
     try { 
       Process tr = Runtime.getRuntime().exec(sketchPath()+"/../munge/munge.sh");
