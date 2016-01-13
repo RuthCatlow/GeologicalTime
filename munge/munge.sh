@@ -47,7 +47,7 @@ function writeVideo(){
   var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
-    '-i', program.output+'/tmp/out%d.png',
+    '-i', program.output+'/tmp/out%5d.png',
     '-y',
     '-vcodec', 'libx264',
 		// Won't play in Android browser without this.
