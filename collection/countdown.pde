@@ -23,9 +23,9 @@ void smallText(boolean bold){
    int fontSize = 25;
   PFont openSans;
   if(bold == true){
-    openSans = createFont("OpenSans-Bold.ttf", fontSize);
+    openSans = createFont("SourceCodePro-Bold.ttf", fontSize);
   } else {
-   openSans = createFont("OpenSans-Semibold.ttf", fontSize);
+    openSans = createFont("SourceCodePro-Semibold.ttf", fontSize);
   }
   textFont(openSans, fontSize);
 
