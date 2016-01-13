@@ -10,16 +10,17 @@ BufferedReader reader;
 Capture cam;
 String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
-String outputDirectory = "../output/";
+String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
+String outputDirectory = rootDirectory+"output/";
 
-int imageIntervalShort = 180;                  // seconds
+int imageIntervalShort = 10;                  // seconds
 int imageIntervalLong = 360;                   // seconds
 int imageInterval = imageIntervalShort;        // seconds
 int overThresholdCount = 0;
 
 int freezeDuration = 3000;                     // milliseconds
 
-int cameraIndex = 14;
+int cameraIndex = 6;
 int outputImageWidth = 720;
 
 long mostRecent;
@@ -179,9 +180,9 @@ void draw() {
     log.close();
 
     delayTime = millis();
-/*
+
     try { 
-      Process tr = Runtime.getRuntime().exec(sketchPath()+"/../munge/munge.sh");
+      Process tr = Runtime.getRuntime().exec(rootDirectory+"/munge/munge.sh");
       BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
       String s = rd.readLine();
       println(s);
@@ -189,6 +190,5 @@ void draw() {
     catch (IOException e) {
       println(e);
     }
-    */
   }
 }
