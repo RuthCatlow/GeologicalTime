@@ -19,6 +19,7 @@ program
   .version('0.0.1')
   .option('-i, --input [path]', 'Specify an input directory')
   .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
+  .option('-d, --duration <seconds>', 'Duration of output video in seconds', 180)
   .parse(process.argv);
 
 var inputDirectory = program.input || program.output + '/images/';
@@ -125,11 +126,10 @@ function runGenerator(fn) {
 }
 
 function writeVideo(){
-  var outputFrameRate = images.length/180;
-  var inputFrameRate = 1/(180/images.length);
+  // var outputFrameRate = images.length/180;
+  var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
-  // Debug.
-  // uploadVideo(outputFile, images.length); return;
+	// http://stackoverflow.com/a/24697998/970059
   var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
