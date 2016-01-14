@@ -51,8 +51,11 @@ function ftpSend(){
           if(err) {
             logError(file.src, err);
           }
-          winston.log('info', 'Uploaded: ' + file.dest);
+          winston.log('info', 'Uploaded: ' + file.src);
           if(count === files.length){
+            fs.unlinkSync(program.image, function(){
+              winston.info('Image deleted');
+            });
             c.end();
           }
         });
