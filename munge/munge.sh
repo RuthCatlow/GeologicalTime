@@ -98,7 +98,7 @@ function writeVideo(){
   ];
 	// Ensure min out frame rate of {minOutFrameRate}
 	if(images.length < program.duration*minOutFrameRate){
-		args.splice(-1, 0, '-r', minOutFrameRate);
+		args.splice(-1, 0, '-r', 24);
 	} else {
 		args.splice(-1, 0, '-crf', 26);
 	}
