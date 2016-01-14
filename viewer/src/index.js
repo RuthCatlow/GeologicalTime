@@ -27,7 +27,7 @@ $(document).ready(function(){
       playerStill.on('loadeddata', function(){
 				console.log(player.duration());
         playerStill.pause();
-        // playerStill.currentTime(60);
+        //playerStill.currentTime(170);
       });
 			playerStill.on('timeupdate', function(){
         playerStill.pause();
@@ -57,7 +57,7 @@ $(document).ready(function(){
 
   // Player event - loadeddata/video ready.
   player.on('loadeddata', function(){
-		player.currentTime(175);
+		player.currentTime(160);
     player.play();
   });
 
@@ -116,7 +116,7 @@ function getCurrentCount(){
 
 function currentCountSuccess(data){
 	// console.log(data.count, count);
-	if(data.count === count){
+	if(data && data.count === count){
 		$('body').addClass('is-waiting');
 		setTimeout(getCurrentCount, 2000);
 		return;
