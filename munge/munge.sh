@@ -5,6 +5,7 @@
 // Examples ffmpeg command: ffmpeg -f image2 -r 5.05555555556 -i out%d.png -y -vcodec libx264 -r 24 -crf 24 test004-1000k-crf24.mp4
 
 var fs = require('fs');
+var path = require('path');
 var util = require('util');
 
 var winston = require('winston');
@@ -22,10 +23,44 @@ program
   .parse(process.argv);
 
 var inputDirectory = program.input || program.output + '/images/';
-
 var startTime = process.hrtime();
-var images = fileList(program.output+'/tmp');
-writeVideo();
+var images = [];
+
+var mkdirSync = function (path) {
+  try {
+    fs.mkdirSync(path);
+  } catch(e) {
+    if ( e.code != 'EEXIST' ) throw e;
+  }
+}
+
+var tmpDirList = fileList(program.output+'/tmp');
+// If more than one image then we're playing catch up.
+if(tmpDirList.length <= 1){
+	winston.log('info', 'Starting image reordering.');
+	reorderImages();
+} else {
+	winston.log('info', 'Too many images in tmp: ', tmpDirList.length);
+}
+
+function reorderImages(){
+	mkdirSync('./write');
+
+	var args = [
+		program.output
+	];
+	var config = {
+		detached : false,
+		stdio: ['pipe', 'pipe', 'pipe']
+	};
+
+	run_cmd(
+		__dirname+'/reorder.sh', args, config, function(numFiles){
+			winston.info('Finished reordering')
+			writeVideo();
+		}
+	);
+}
 
 function fileList(dir) {
   return fs.readdirSync(dir).reduce(function(list, file) {
@@ -38,36 +73,40 @@ function fileList(dir) {
   }, []);
 }
 
-
 function writeVideo(){
-	var  minOutFrameRate = 24;
+	images = fileList(program.output+'/write');
+	winston.log('info', 'Images: ' + images.length);
+
+	var minOutFrameRate = 12;
   var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
 	// http://stackoverflow.com/a/24697998/970059
   var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
-    '-i', program.output+'/tmp/out%5d.png',
+    '-i', program.output+'/write/out%5d.png',
     '-y',
     '-vcodec', 'libx264',
 		// Won't play in Android browser without this.
 		'-pix_fmt', 'yuv420p',
 		// Solves 'height not divisible by 2' error. http://stackoverflow.com/a/29582287/970059
 		'-vf', 'scale=720:-2',
-    '-crf', '26',
+    // '-r', '24',
+    // '-crf', '26',
     '-movflags', 'faststart',
     outputFile
   ];
 	// Ensure min out frame rate of {minOutFrameRate}
 	if(images.length < program.duration*minOutFrameRate){
-		// args.splice(-1, 0, '-r', minOutFrameRate);
+		args.splice(-1, 0, '-r', minOutFrameRate);
+	} else {
+		args.splice(-1, 0, '-crf', 26);
 	}
   var config = {
     detached : false,
     stdio: ['pipe', 'pipe', 'pipe']
   };
-  winston.log('info', 'Start encoding');
-  winston.log('info', 'command: ffmpeg '+ args.join(' '));
+  winston.log('info', 'Start encoding: ffmpeg '+ args.join(' '));
   run_cmd(
     'ffmpeg', args, config, function(numFiles){
       var secs = elapsedTime();
@@ -81,8 +120,12 @@ function writeVideo(){
 function uploadVideo(filePath, numFiles, time){
   winston.log('info', 'Starting upload: '+filePath);
   var args = [
-    '-f', filePath
+    '-f', filePath,
+    '-i', program.output + "/tmp/out"+pad('00000', images.length)+'.png'
   ];
+
+winston.log('info', "Image ftp: " + program.output + "/tmp/out"+pad('00000', images.length)+'.png');
+
   var config = {
     detached : true,
     stdio: ['ignore', 'ignore', 'ignore']
