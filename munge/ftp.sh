@@ -8,55 +8,60 @@ var fs = require('fs');
 var program = require('commander');
 var path = require('path');
 var winston = require('winston');
-var Client = require('ftp');
+var ssh2 = require("ssh2");
 
 winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp: true});
 
 program
   .version('0.0.1')
-  .option('-f, --file [path]', 'File to upload', 'foo.txt')
+  .option('-f, --video [path]', 'File to upload', 'foo.txt')
   .option('-i, --image [path]', 'Image to upload')
   .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
   .parse(process.argv);
 
 function ftpSend(){
-  winston.log('info', 'FTP client connecting');
+  winston.log('info', 'SFTP client connecting');
 
   var options = {
     host: process.env.GTP_HOST,
-    user: process.env.GTP_USER,
+    username: process.env.GTP_USER,
     password: process.env.GTP_PASSWORD
   };
-
   var baseDirectory = process.env.GTP_BASE_DIR;
-  var c = new Client();
-  c.on('ready', function() {
-    c.put(program.file, baseDirectory+'/videos/'+path.basename(program.file), function(err) {
+  var files = [
+    { src: program.video, dest: baseDirectory+'videos/'+path.basename(program.video) },
+    { src: program.image, dest: baseDirectory+'images/'+path.basename(program.image) },
+    { src: program.output+'/count.json', dest: baseDirectory+'count.json' }
+  ];
+  var count = 0;
 
-      if(err) logError(program.file, err);
-      winston.log('info', 'Successfully uploaded: '+program.file);
+  var c = new ssh2();
+  c.on('ready', function () {
+    winston.log('info', 'SFTP client ready');
 
-      // If successful then upload image
-      c.put(program.image, baseDirectory+'/images/'+path.basename(program.image), function(err) {
+    c.sftp(function (err, sftp) {
+      if(err) {
+        winston.log('error', err);
+        throw err;
+      }
 
-        if(err) logError(program.image, err);
-        winston.log('info', 'Successfully uploaded: '+ program.image);
-
-          fs.unlinkSync(program.image, function(){
-            winston.info('Image deleted');
-          });
-
-          // If successful then upload count.json.
-          c.put(program.output+'/count.json', baseDirectory+'/count.json', function(err) {
-            if(err) logError('count.json', err);
-            winston.log('info', 'Successfully uploaded: count.json');
+      files.forEach(function(file){
+        sftp.fastPut(file.src, file.dest, {}, function (err) {
+          count++;
+          if(err) {
+            logError(file.src, err);
+          }
+          winston.log('info', 'Uploaded: ' + file.dest);
+          if(count === files.length){
             c.end();
-          });
-
+          }
         });
+      });
+
     });
   });
-	c.connect(options);
+   
+  c.connect(options);
 }
 
 function logError(file, err){
