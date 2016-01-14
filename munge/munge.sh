@@ -34,13 +34,21 @@ var mkdirSync = function (path) {
   }
 }
 
+var re = /0*([1-9][0-9]*|0)/;
 var tmpDirList = fileList(program.output+'/tmp');
+var writeDirList = fileList(program.output+'/write');
 // If more than one image then we're playing catch up.
 if(tmpDirList.length <= 1){
-	winston.log('info', 'Starting image reordering.');
-	reorderImages();
+	// Check if next image in tmp is the next in order.
+	var match = tmpDirList[0].match(re);
+	if(match == null || match[1] != writeDirList.length+1){
+		winston.log('error', 'Image in tmp/ is not the next image.');
+	} else {
+		winston.log('info', 'Starting image reordering.');
+		reorderImages();
+	}
 } else {
-	winston.log('info', 'Too many images in tmp: ', tmpDirList.length);
+	winston.log('error', 'Too many images in tmp: ', tmpDirList.length);
 }
 
 function reorderImages(){
@@ -81,27 +89,37 @@ function writeVideo(){
   var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
 	// http://stackoverflow.com/a/24697998/970059
-  var args = [
+
+	var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
     '-i', program.output+'/write/out%5d.png',
     '-y',
     '-vcodec', 'libx264',
+	];
+
+  var argsAdvanced = [
 		// Won't play in Android browser without this.
 		'-pix_fmt', 'yuv420p',
 		// Solves 'height not divisible by 2' error. http://stackoverflow.com/a/29582287/970059
 		'-vf', 'scale=720:-2',
-    // '-r', '24',
-    // '-crf', '26',
     '-movflags', 'faststart',
-    outputFile
   ];
+
+	if(images.length > 2){
+		args = args.concat(argsAdvanced);
+	}
+
 	// Ensure min out frame rate of {minOutFrameRate}
 	if(images.length < program.duration*minOutFrameRate){
-		args.splice(-1, 0, '-r', 24);
+		args.push('-r');
+		args.push(24);
 	} else {
-		args.splice(-1, 0, '-crf', 26);
+		args.push('-cfr');
+		args.push(26);
 	}
+	args.push(outputFile);
+
   var config = {
     detached : false,
     stdio: ['pipe', 'pipe', 'pipe']
