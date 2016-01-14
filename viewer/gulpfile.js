@@ -16,7 +16,8 @@ gulp.task('default', function () {
 	var globs = [
 		'dist/*.css',
 		'dist/*.js',
-		'index.html'
+		'index.html',
+		'gallery.html'
 	];
 
   var baseDirectory = process.env.GTP_BASE_DIR;

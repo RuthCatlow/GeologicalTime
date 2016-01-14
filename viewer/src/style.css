@@ -27,6 +27,7 @@ body {
   position:relative;
   width: 100%;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .gtp-wrapper-half {
@@ -50,6 +51,7 @@ body {
   }
 
   .gtp-wrapper-half:nth-of-type(2) {
+    padding-top: 30px;
     padding-left: 15px;
     padding-right: 30px;
   }
@@ -58,6 +60,7 @@ body {
 .gtp-wrapper-half__inner {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
 .gtp-btn-play {
@@ -79,15 +82,15 @@ body {
 
 .gtp-btn-fullscreen {
   position: absolute;
-  left: 20px;
-  bottom: 20px;
+  right: 20px;
+  bottom: 30px;
   transition: opacity 2s linear;
   opacity: 1;
 }
 
 @media(min-width:1000px){
   .gtp-btn-fullscreen {
-    right: 10px;
+    right: 20px;
     left: auto;
     bottom: 40px;
   }
@@ -124,7 +127,7 @@ button {
   cursor: pointer;
   display: inline-block;
   font-size: 14px;
-  margin: 0 10px;
+  margin: 0;
   padding: 12px 45px;
   text-transform: uppercase;
   transition: all 80ms ease-in-out;
@@ -141,4 +144,64 @@ button:hover {
 .button--overlay {
   background-color: rgba(255,0,0,0.5);
   font-weight: bold;
+}
+
+.gtp-wrapper-half__inner {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+
+.gtp-image-still {
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@media(min-width:1000px){
+  .gtp-image-still {
+    height: auto;
+    width: 100%;
+    max-height: none;
+  }
+}
+
+.gtp-info {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.gtp-info a:visited, a:focus,
+.gtp-info a {
+  color: white;
+}
+
+.gtp-waiting-msg {
+  color: white;
+  opacity: 0;
+  font-size: 50px;
+  height: 50px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity 2s;
+  width: 100%;
+  z-index: 10;
+}
+
+body.is-waiting .gtp-waiting-msg {
+  display: block;
+  opacity: 1;
+}
+
+body.is-waiting .gtp-wrapper-half:nth-of-type(2) .gtp-wrapper-half__inner {
+  opacity: 0.25;
 }

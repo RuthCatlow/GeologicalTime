@@ -25,9 +25,13 @@ $(document).ready(function(){
     playerStill = videojs("gtp-video-still", config)
     playerStill.ready(function(){
       playerStill.on('loadeddata', function(){
-        // playerStill.pause();
-        // playerStill.currentTime(0);
+				console.log(player.duration());
+        playerStill.pause();
+        // playerStill.currentTime(60);
       });
+			playerStill.on('timeupdate', function(){
+        playerStill.pause();
+			});
       // Set dimensions
       setPlayerDimensions(playerStill);
       // Event - Window resize
@@ -42,6 +46,7 @@ $(document).ready(function(){
 
   player = videojs("gtp-video", config);
   player.ready(function(){
+		$('body').addClass('is-waiting');
     // Pause because nothing to load yet.
     player.pause();
     // Set dimensions
@@ -52,6 +57,7 @@ $(document).ready(function(){
 
   // Player event - loadeddata/video ready.
   player.on('loadeddata', function(){
+		player.currentTime(175);
     player.play();
   });
 
@@ -80,6 +86,9 @@ $(document).ready(function(){
 
   $playButton.on('click', function(){
     player.play();
+		if(playerStill){
+			playerStill.play();
+		}
   });
 
 });
@@ -98,17 +107,27 @@ function getCurrentCount(){
     url: '/count.json',
     // type of data we are expecting in return:
     dataType: 'json',
-    success: function(data){
-      // Debug
-      // count = 324;
-      count = data.count;
-      setVideo();
-      updateImageCount();
-    },
+    success: currentCountSuccess,
     error: function(xhr, type){
       console.error('Ajax error!')
     }
   })
+}
+
+function currentCountSuccess(data){
+	// console.log(data.count, count);
+	if(data.count === count){
+		$('body').addClass('is-waiting');
+		setTimeout(getCurrentCount, 2000);
+		return;
+	}
+	$('body').removeClass('is-waiting');
+	// Debug
+	// count = 324;
+	count = data.count;
+	setVideo();
+	setImage();
+	updateImageCount();
 }
 
 function fullscreenEvents(){
@@ -134,6 +153,15 @@ function updateImageCount(){
   $('.gtp-js-count').text(images);
 }
 
+function setImage(){
+  var filename = '/images/out'+pad('00000', count)+'.png';
+	// var bgUrl = "url" + "("  + filename + ")";
+  $(".gtp-js-image-still").attr("src", filename);
+  $(".gtp-js-image-still").parent().css("background-image", "url("+filename+")");
+	$(".gtp-js-image-still").hide();
+	console.log($(".gtp-js-image-still").parent());
+}
+
 function setVideo(){
   var filename = '/videos/video-'+pad('00000', count)+'.mp4';
   $("source", this.el_).attr("src", filename);
@@ -151,7 +179,7 @@ function setVideo(){
 }
 
 function onVideoEnd(){
-  count++;
+	console.log('video end');
   getCurrentCount();
 }
 

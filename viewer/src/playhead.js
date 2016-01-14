@@ -39,6 +39,7 @@ function step() {
 }
 
 function updateTime(next, duration){
+	// console.log(next);
   current = next;
   total = duration;
 }
