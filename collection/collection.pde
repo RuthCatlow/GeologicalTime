@@ -10,10 +10,11 @@ BufferedReader reader;
 Capture cam;
 String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
+// String rootDirectory = "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/";
 String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
 String outputDirectory = rootDirectory+"output/";
 
-int imageIntervalShort = 10;                  // seconds
+int imageIntervalShort = 180;                  // seconds
 int imageIntervalLong = 360;                   // seconds
 int imageInterval = imageIntervalShort;        // seconds
 int overThresholdCount = 0;
@@ -32,7 +33,8 @@ int imageCount = 0;
 int encodingTime = 0;
 
 void settings() {
-	fullScreen();
+  fullScreen();
+  // size(1080, 720);
 }
 
 void setup() {
@@ -108,10 +110,12 @@ void getJson(){
   // interval time.
   if(encodingTime > round(imageIntervalShort*0.8)){
     overThresholdCount++;
+    println("over threshold");
   }
-   //<>//
-  if(overThresholdCount > 5){
+
+  if(overThresholdCount > 2){
     imageInterval = imageIntervalLong;
+    println("Increasing image interval");
   }
 }
 
@@ -164,15 +168,21 @@ void draw() {
     latestImage = createImage(outputImageWidth, outputImageHeight, RGB);
     latestImage.copy(cam, 0, camScreenY, width, camScreenHeight, 0, 0, outputImageWidth, outputImageHeight);
 
-    imageCount++;
-
     // Save image with 'year-date-month' directory and 'hour-min' file. 
     String dateDirectory = outputDirectory+"images/" + year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
     latestImage.save(dateDirectory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
     // Save image into tmp directory for copying.
+    
     String copyDirectory = outputDirectory+"tmp/";
-    latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
-  
+    if(imagesInDir(copyDirectory) == 0){
+      getJson();
+      imageCount++;
+      latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
+      startMunge();
+    } else {
+       println("Skipping"); 
+    }
+    
     // Save most recent time in case of crash.
     log = createWriter(logFilename);
     log.println(mostRecent);
@@ -180,15 +190,24 @@ void draw() {
     log.close();
 
     delayTime = millis();
-
-    try { 
-      Process tr = Runtime.getRuntime().exec(rootDirectory+"/munge/munge.sh");
-      BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
-      String s = rd.readLine();
-      println(s);
-    } 
-    catch (IOException e) {
-      println(e);
-    }
   }
+}
+
+void startMunge(){
+ try { 
+    Process tr = Runtime.getRuntime().exec(rootDirectory+"/munge/munge.sh");
+    BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
+    String s = rd.readLine();
+    println(s);
+  } 
+  catch (IOException e) {
+    println(e);
+  }
+}
+
+int imagesInDir(String dirPath){
+  File theDir = new File(dirPath);
+  String[] theList = theDir.list();
+  int fileCount = theList.length;
+  return fileCount;
 }
