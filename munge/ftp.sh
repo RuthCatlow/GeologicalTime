@@ -20,7 +20,7 @@ program
   .parse(process.argv);
 
 function ftpSend(){
-  winston.log('info', 'SFTP client connecting');
+  winston.log('info', '<<<<<<<<<<<< SFTP client connecting >>>>>>>>>>>>');
 
   var options = {
     host: process.env.GTP_HOST,

@@ -34,6 +34,8 @@ var mkdirSync = function (path) {
   }
 }
 
+mkdirSync(program.output+'/write');
+
 var re = /0*([1-9][0-9]*|0)/;
 var tmpDirList = fileList(program.output+'/tmp');
 var writeDirList = fileList(program.output+'/write');
@@ -44,7 +46,7 @@ if(tmpDirList.length <= 1){
 	if(match == null || match[1] != writeDirList.length+1){
 		winston.log('error', 'Image in tmp/ is not the next image.');
 	} else {
-		winston.log('info', 'Starting image reordering.');
+		winston.log('info', '<<<<<<<<<<<<<<< Starting image reordering >>>>>>>>>>>>>>>>>>>');
 		reorderImages();
 	}
 } else {
@@ -52,7 +54,6 @@ if(tmpDirList.length <= 1){
 }
 
 function reorderImages(){
-	mkdirSync('./write');
 
 	var args = [
 		program.output
@@ -64,7 +65,6 @@ function reorderImages(){
 
 	run_cmd(
 		__dirname+'/reorder.sh', args, config, function(numFiles){
-			winston.info('Finished reordering')
 			writeVideo();
 		}
 	);
@@ -83,7 +83,7 @@ function fileList(dir) {
 
 function writeVideo(){
 	images = fileList(program.output+'/write');
-	winston.log('info', 'Images: ' + images.length);
+	winston.log('info', 'Reordered '+ images.length + ' images' );
 
 	var minOutFrameRate = 12;
   var inputFrameRate = 1/(program.duration/images.length);
@@ -128,7 +128,6 @@ function writeVideo(){
   run_cmd(
     'ffmpeg', args, config, function(numFiles){
       var secs = elapsedTime();
-  		winston.log('info', 'Encoding complete: ' +outputFile);
   		winston.log('info', 'Complete in ' + secs  + 's');
       uploadVideo(outputFile, numFiles, secs);
     }
@@ -136,26 +135,23 @@ function writeVideo(){
 }
 
 function uploadVideo(filePath, numFiles, time){
-  winston.log('info', 'Starting upload: '+filePath);
   var args = [
     '-f', filePath,
     '-i', program.output + "/tmp/out"+pad('00000', images.length)+'.png'
   ];
 
-winston.log('info', "Image ftp: " + program.output + "/tmp/out"+pad('00000', images.length)+'.png');
-
   var config = {
     detached : true,
     stdio: ['ignore', 'ignore', 'ignore']
   };
-  // ftp(filePath);
+
   // Write file count before
   fs.writeFile(program.output + "/count.json", JSON.stringify({count:numFiles, time: time }), function(err) {
     if(err) {
       winston.log('error', err);
       return
     }
-    winston.log("info", "Count file saved");
+  	winston.log('info', 'Starting upload');
     run_cmd(__dirname+'/ftp.sh', args, config, function(){});
     process.exit();
   });
