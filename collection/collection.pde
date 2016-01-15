@@ -21,7 +21,7 @@ int overThresholdCount = 0;
 
 int freezeDuration = 3000;                     // milliseconds
 
-int cameraIndex = 6;
+int cameraIndex = 69;
 int outputImageWidth = 720;
 
 long mostRecent;
@@ -39,7 +39,7 @@ void settings() {
 
 void setup() {
   background(0);
-  
+
   String[] cameras = Capture.list();
   String mostRecentLog;
 
@@ -48,7 +48,7 @@ void setup() {
     reader = createReader(logFilename);
     try {
       mostRecentLog = reader.readLine();
-    } 
+    }
     catch (IOException e) {
       e.printStackTrace();
       mostRecentLog = null;
@@ -66,10 +66,10 @@ void setup() {
       // println(cameras[i]);
       camLog.println(i + " - " + cameras[i]);
     }
-    camLog.flush(); 
+    camLog.flush();
     camLog.close();
 
-    // The camera can be initialized directly using an 
+    // The camera can be initialized directly using an
     // element from the array returned by list():
     cam = new Capture(this, cameras[cameraIndex]);
     cam.start();
@@ -85,10 +85,10 @@ void setup() {
   float ratio = width/float(camWidth);
   camScreenHeight = round(camHeight*ratio);
   camScreenY = (height - camScreenHeight)/2;
-  
+
   makeDir(outputDirectory+"tmp/");
   getJson();
-  
+
   // println(0 + " " + camScreenY + " " + width  + " " + camScreenHeight);
 }
 
@@ -98,7 +98,7 @@ void getJson(){
   if(jsonFile.exists() == true){
     json = loadJSONObject(outputDirectory+"count.json");
   }
-  
+
   if(json == null){
     imageCount = 0;
     encodingTime = 0;
@@ -106,7 +106,7 @@ void getJson(){
     imageCount = json.getInt("count");
     encodingTime = json.getInt("time");
   }
-  
+
   // Check encoding isn't getting too close to our
   // interval time.
   if(encodingTime > round(imageIntervalShort*0.8)){
@@ -137,17 +137,17 @@ void draw() {
   long currentTime = d.getTime()/1000;
   int timeout = imageInterval;
   timeout++; // Add 1 so we can go down to zero.
-    
+
   // Delay after image is saved.
   if (delayTime > 0 && millis() < delayTime + freezeDuration) {
-    // Render latest save images on screen for delay (freeze frame).   
+    // Render latest save images on screen for delay (freeze frame).
     image(latestImage, 0, camScreenY, width, camScreenHeight);
     return;
-  }    
-  
+  }
+
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
-  
+
   int countdownSeconds = round(timeout-currentTime%timeout);
   if(countdownSeconds <= 3){
     drawCircle();
@@ -162,17 +162,17 @@ void draw() {
     // Store this minute so we don't continually take more images.
     mostRecent = currentTime;
 
-    // Resize cam image to desired width. 
+    // Resize cam image to desired width.
     float ratio = camScreenHeight/float(width);
     int outputImageHeight = round(outputImageWidth*(ratio));
     latestImage = createImage(outputImageWidth, outputImageHeight, RGB);
     latestImage.copy(cam, 0, camScreenY, width, camScreenHeight, 0, 0, outputImageWidth, outputImageHeight);
 
-    // Save image with 'year-date-month' directory and 'hour-min' file. 
+    // Save image with 'year-date-month' directory and 'hour-min' file.
     String dateDirectory = outputDirectory+"images/" + year()+"-"+nf(month(), 2)+"-"+nf(day(), 2)+"/";
     latestImage.save(dateDirectory+nf(hour(), 2)+"-"+nf(minute(), 2)+".png");
     // Save image into tmp directory for copying.
-    
+
     String copyDirectory = outputDirectory+"tmp/";
     if(imagesInDir(copyDirectory) == 0){
       getJson();
@@ -180,13 +180,13 @@ void draw() {
       latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
       startMunge();
     } else {
-       println("Skipping"); 
+       println("Skipping");
     }
-    
+
     // Save most recent time in case of crash.
     log = createWriter(logFilename);
     log.println(mostRecent);
-    log.flush(); 
+    log.flush();
     log.close();
 
     delayTime = millis();
@@ -194,12 +194,12 @@ void draw() {
 }
 
 void startMunge(){
- try { 
+ try {
     Process tr = Runtime.getRuntime().exec(rootDirectory+"munge/munge.sh");
     BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
     String s = rd.readLine();
     println(s);
-  } 
+  }
   catch (IOException e) {
     println(e);
   }
