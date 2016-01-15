@@ -142,7 +142,7 @@ function writeVideo(){
     'ffmpeg', args, config, function(numFiles){
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
-      // uploadVideo(outputFile, numFiles, secs);
+      uploadVideo(outputFile, numFiles, secs);
     }
   );
 }
