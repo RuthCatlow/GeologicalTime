@@ -128,7 +128,7 @@ function writeVideo(){
 		args.push('-r');
 		args.push(24);
 	} else {
-		args.push('-cfr');
+		args.push('-crf');
 		args.push(26);
 	}
 	args.push(outputFile);
@@ -165,7 +165,7 @@ function uploadVideo(filePath, numFiles, time){
       return
     }
   	winston.log('info', 'Starting upload');
-    run_cmd(__dirname+'/ftp.sh', args, config, function(){});
+   	run_cmd(__dirname+'/ftp.sh', args, config, function(){});
     process.exit();
   });
 }
