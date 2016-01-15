@@ -86,6 +86,7 @@ void setup() {
   camScreenHeight = round(camHeight*ratio);
   camScreenY = (height - camScreenHeight)/2;
   
+  makeDir(outputDirectory+"tmp/");
   getJson();
   
   // println(0 + " " + camScreenY + " " + width  + " " + camScreenHeight);
@@ -155,7 +156,6 @@ void draw() {
     drawCountdown(countdownSeconds);
     drawImageCount(imageCount+1);
   }
-    
   // Have we passed the most recent stored time and is this time
   // divisible by {timeout} seconds?
   if (currentTime > mostRecent && currentTime%timeout == 0) {
@@ -195,7 +195,7 @@ void draw() {
 
 void startMunge(){
  try { 
-    Process tr = Runtime.getRuntime().exec(rootDirectory+"/munge/munge.sh");
+    Process tr = Runtime.getRuntime().exec(rootDirectory+"munge/munge.sh");
     BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
     String s = rd.readLine();
     println(s);
@@ -205,8 +205,21 @@ void startMunge(){
   }
 }
 
+void makeDir(String path){
+  File theDir = new File(path);
+  try{
+    theDir.mkdir();
+  } catch(SecurityException se){
+    println("Could not make directory:"+path);
+    println(se);
+  }
+}
+
 int imagesInDir(String dirPath){
   File theDir = new File(dirPath);
+  if(theDir.exists() == false){
+    return 0;
+  }
   String[] theList = theDir.list();
   int fileCount = theList.length;
   return fileCount;
