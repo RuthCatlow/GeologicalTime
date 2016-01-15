@@ -3,6 +3,8 @@
 // vim: set ft=javascript:
 
 // Examples ffmpeg command: ffmpeg -f image2 -r 5.05555555556 -i out%d.png -y -vcodec libx264 -r 24 -crf 24 test004-1000k-crf24.mp4
+//
+require('dotenv').load({path: __dirname+'/.env'});
 
 var fs = require('fs');
 var path = require('path');
@@ -13,6 +15,17 @@ var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
 
+var mailOptions = {
+	to: 'gareth.foote@gmail.com',
+	from: 'gtp@garethfoote.co.uk',
+	host: 'smtp.webfaction.com',
+	port: 25,
+	username: 'foote_gtp',
+	password: process.env.GTP_PASSWORD
+};
+
+require('winston-mail').Mail;
+winston.add(winston.transports.Mail, mailOptions);
 winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
 program
@@ -129,7 +142,7 @@ function writeVideo(){
     'ffmpeg', args, config, function(numFiles){
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
-      uploadVideo(outputFile, numFiles, secs);
+      // uploadVideo(outputFile, numFiles, secs);
     }
   );
 }

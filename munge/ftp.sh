@@ -10,6 +10,17 @@ var path = require('path');
 var winston = require('winston');
 var ssh2 = require("ssh2");
 
+var mailOptions = {
+	to: 'gareth.foote@gmail.com',
+	from: 'gtp@garethfoote.co.uk',
+	host: 'smtp.webfaction.com',
+	port: 25,
+	username: 'foote_gtp',
+	password: process.env.GTP_PASSWORD
+};
+
+require('winston-mail').Mail;
+winston.add(winston.transports.Mail, mailOptions);
 winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp: true});
 
 program
