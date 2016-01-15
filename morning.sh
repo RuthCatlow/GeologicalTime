@@ -10,8 +10,8 @@ else
   PROCESSING=/home/gareth/Desktop/processing-3.0.1/processing
 fi
 
-rm ${ROOT}output/tmp/* -i
-rm ${ROOT}output/count.json -i
+rm ${ROOT}output/tmp/* -if
+rm ${ROOT}output/count.json -if
 cd $ROOT & git stash & git pull origin master
 
 ${PROCESSING} ${ROOT}collection/collection.pde
