@@ -10,7 +10,6 @@ else
 fi
 
 rm ${ROOT}output/tmp/* -if
-rm ${ROOT}output/count.json -if
 cd $ROOT & git stash & git pull origin master
 
 ${PROCESSING} ${ROOT}collection/collection.pde
