@@ -15,7 +15,6 @@ munge/images-source
 
 log.txt
 cams.txt
-count.json
 munge/tmp/
 output/tmp/*.png
 
