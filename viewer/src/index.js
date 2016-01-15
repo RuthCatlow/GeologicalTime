@@ -25,7 +25,6 @@ $(document).ready(function(){
     playerStill = videojs("gtp-video-still", config)
     playerStill.ready(function(){
       playerStill.on('loadeddata', function(){
-				console.log(player.duration());
         playerStill.pause();
         //playerStill.currentTime(170);
       });
@@ -57,12 +56,11 @@ $(document).ready(function(){
 
   // Player event - loadeddata/video ready.
   player.on('loadeddata', function(){
-		// player.currentTime(90);
     player.play();
   });
 
   player.on('timeupdate', function(e){
-    // console.log(player.currentTime());
+    console.log(player.currentTime());
     $playButton.addClass('gtp-btn-play--hidden');
     playhead.updateTime(player.currentTime(), player.duration());
   });
@@ -85,6 +83,7 @@ $(document).ready(function(){
   });
 
   $playButton.on('click', function(){
+		console.log('click');
     player.play();
 		if(playerStill){
 			playerStill.play();
@@ -159,7 +158,6 @@ function setImage(){
   $(".gtp-js-image-still").attr("src", filename);
   $(".gtp-js-image-still").parent().css("background-image", "url("+filename+")");
 	$(".gtp-js-image-still").hide();
-	console.log($(".gtp-js-image-still").parent());
 }
 
 function setVideo(){
@@ -179,7 +177,6 @@ function setVideo(){
 }
 
 function onVideoEnd(){
-	console.log('video end');
   getCurrentCount();
 }
 
