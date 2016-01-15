@@ -14,5 +14,5 @@ rm ${ROOT}output/tmp/* -i
 rm ${ROOT}output/count.json -i
 cd $ROOT & git stash & git pull origin master
 
-${processing} ${ROOT}collection/collection.pde
+${PROCESSING} ${ROOT}collection/collection.pde
 
