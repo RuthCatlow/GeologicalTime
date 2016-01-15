@@ -120,7 +120,7 @@ body.is-fullscreen .gtp-btn-fullscreen {
 button {
   font-family: 'Source Code Pro', sans-serif;
   background: transparent;
-  border: 2px solid white;
+  border: 1px solid white;
   border-radius: 36px;
   color: #fff;
   cursor: pointer;
