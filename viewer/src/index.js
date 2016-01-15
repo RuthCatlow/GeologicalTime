@@ -57,7 +57,7 @@ $(document).ready(function(){
 
   // Player event - loadeddata/video ready.
   player.on('loadeddata', function(){
-		player.currentTime(160);
+		// player.currentTime(90);
     player.play();
   });
 
@@ -109,14 +109,14 @@ function getCurrentCount(){
     dataType: 'json',
     success: currentCountSuccess,
     error: function(xhr, type){
-      console.error('Ajax error!')
+			setTimeout(getCurrentCount, 2000);
     }
   })
 }
 
 function currentCountSuccess(data){
 	// console.log(data.count, count);
-	if(data && data.count === count){
+	if(data === null || data.count === count){
 		$('body').addClass('is-waiting');
 		setTimeout(getCurrentCount, 2000);
 		return;
