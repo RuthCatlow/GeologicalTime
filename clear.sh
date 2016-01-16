@@ -14,5 +14,5 @@ then
   mv output/{write,images,videos} $ARCHIVE
   rm output/tmp/ -r
   rm output/count.json
-  ssh ruth@gtp.ruthcatlow.net "rm ${GTP_BASE_DIR}{images,videos}/*; rm ${GTP_BASE_DIR}count.json"
+  ssh ruth@gtp.ruthcatlow.net "mkdir ${GTP_BASE_DIR}archive/ -p; mv ${GTP_BASE_DIR}{images,videos} ${GTP_BASE_DIR}archive/; mv ${GTP_BASE_DIR}count.json ${GTP_BASE_DIR}archive/; mkdir ${GTP_BASE_DIR}{images,videos}"
 fi
