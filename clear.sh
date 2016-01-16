@@ -18,4 +18,4 @@ mv ${ROOT}output/{write,images,videos} $ARCHIVE
 rm ${ROOT}output/tmp/ -r
 rm ${ROOT}output/count.json
 mkdir ${ROOT}output/{images,videos}
-# ssh ruth@gtp.ruthcatlow.net "mkdir ${GTP_BASE_DIR}archive/ -p; mv ${GTP_BASE_DIR}{images,videos} ${GTP_BASE_DIR}archive/; mv ${GTP_BASE_DIR}count.json ${GTP_BASE_DIR}archive/; mkdir ${GTP_BASE_DIR}{images,videos}"
+ssh ruth@gtp.ruthcatlow.net "mkdir ${GTP_BASE_DIR}archive/ -p; mv ${GTP_BASE_DIR}{images,videos} ${GTP_BASE_DIR}archive/; mv ${GTP_BASE_DIR}count.json ${GTP_BASE_DIR}archive/; mkdir ${GTP_BASE_DIR}{images,videos}"
