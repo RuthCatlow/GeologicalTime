@@ -10,7 +10,13 @@ else
 fi
 
 rm ${ROOT}output/tmp/* -if
-cd $ROOT & git stash & git pull origin master
+
+if [ -z "$1" ] || [ "$1" != "nogit" ]
+then
+  cd $ROOT & git stash & git pull origin master
+fi
+
+SRCTOTAL=`ls output/write/*.png | wc -l`
+echo {\"count\":$((SRCTOTAL)), \"time\":0} > output/count.json
 
 ${PROCESSING} ${ROOT}collection/collection.pde
-
