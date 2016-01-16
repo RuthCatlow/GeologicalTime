@@ -55,7 +55,7 @@ void drawLargeCountdown(int seconds) {
 
   int fontSize = 500;
   PFont openSans;
-  openSans = createFont("OpenSans-Bold.ttf", fontSize);
+  openSans = createFont("SourceCodePro-Bold.ttf", fontSize);
   textFont(openSans, fontSize);
 
   // println(textAscent());
