@@ -21,7 +21,7 @@ int overThresholdCount = 0;
 
 int freezeDuration = 3000;                     // milliseconds
 
-int cameraIndex = 69;
+int cameraIndex = 16;
 int outputImageWidth = 720;
 
 long mostRecent;
@@ -148,6 +148,18 @@ void draw() {
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
 
+  int startHour = 10;
+  if(hour() < startHour){
+    if(startHour-hour() == 1){
+      int startCountdownSeconds = (60*(59-minute()))+(60-second());
+      drawPreStartMessage("GTP starts in", 120);
+      drawCountdown(startCountdownSeconds);
+    } else {
+      drawPreStartMessage("GTP starts at 10am", 0);
+    }
+    return;  
+  }
+  
   int countdownSeconds = round(timeout-currentTime%timeout);
   if(countdownSeconds <= 3){
     drawCircle();

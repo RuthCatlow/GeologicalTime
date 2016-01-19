@@ -33,6 +33,12 @@ void smallText(boolean bold){
   noStroke();
 }
 
+void drawPreStartMessage(String message, int xOffset) {
+  smallText(false);
+  textAlign(RIGHT, BOTTOM);
+  text(message, width-xOffset, height-40);
+}
+
 void drawImageCount(int imageCount) {
   smallText(false);
   textAlign(RIGHT, BOTTOM);
