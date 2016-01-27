@@ -17,7 +17,9 @@ gulp.task('default', function () {
 		'dist/*.css',
 		'dist/*.js',
 		'index.html',
-		'gallery.html'
+		'gallery.html',
+    'assets/**/*',
+    'favicon.ico'
 	];
 
   var baseDirectory = process.env.GTP_BASE_DIR;
