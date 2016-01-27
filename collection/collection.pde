@@ -148,14 +148,25 @@ void draw() {
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
 
-  int startHour = 10;
-  if(hour() < startHour){
-    if(startHour-hour() == 1){
-      int startCountdownSeconds = (60*(59-minute()))+(60-second());
-      drawPreStartMessage("GTP starts in", 120);
+  int startHour = 8; int startMin = 0;
+  int endHour = 14; int endMin = 0;
+  
+  int startTime = startHour*60+startMin;
+  int endTime = endHour*60+endMin;
+  int now = hour()*60+minute(); 
+  // println(endTime-now);
+  if(now >= endTime){
+    drawMessage("GTP done for the day", 0);
+    return;
+  }
+  if(now < startTime){
+    if(startTime-now < 60){
+      // (minsRemaining-1*60) + (secondsInMinLeft)
+      int startCountdownSeconds = ((startTime-now-1)*60) + (60-second());
+      drawMessage("GTP starts in", 120);
       drawCountdown(startCountdownSeconds);
     } else {
-      drawPreStartMessage("GTP starts at 10am", 0);
+      drawMessage("GTP starts at 10am", 0);
     }
     return;  
   }

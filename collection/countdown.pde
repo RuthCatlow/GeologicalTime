@@ -33,7 +33,7 @@ void smallText(boolean bold){
   noStroke();
 }
 
-void drawPreStartMessage(String message, int xOffset) {
+void drawMessage(String message, int xOffset) {
   smallText(false);
   textAlign(RIGHT, BOTTOM);
   text(message, width-xOffset, height-40);
@@ -42,7 +42,7 @@ void drawPreStartMessage(String message, int xOffset) {
 void drawImageCount(int imageCount) {
   smallText(false);
   textAlign(RIGHT, BOTTOM);
-  text(String.format("image [%05d] in ", imageCount), width-80, height-40);
+  text(String.format("image [%05d] in ", imageCount), width-90, height-40);
 }
 
 void drawCountdown(int seconds) {
