@@ -148,7 +148,7 @@ void draw() {
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
 
-  int startHour = 8; int startMin = 0;
+  int startHour = 10; int startMin = 0;
   int endHour = 14; int endMin = 0;
   
   int startTime = startHour*60+startMin;
