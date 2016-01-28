@@ -149,7 +149,7 @@ void draw() {
   image(cam, 0, camScreenY, width, camScreenHeight);
 
   int startHour = 10; int startMin = 0;
-  int endHour = 14; int endMin = 0;
+  int endHour = 16; int endMin = 0;
   
   int startTime = startHour*60+startMin;
   int endTime = endHour*60+endMin;
