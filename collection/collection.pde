@@ -111,12 +111,17 @@ void getJson(){
   // interval time.
   if(encodingTime > round(imageIntervalShort*0.8)){
     overThresholdCount++;
-    println("over threshold");
+    println("Over threshold:" + overThresholdCount);
+  } else {
+    overThresholdCount = 0;
   }
 
-  if(overThresholdCount > 2){
+  if(overThresholdCount >= 1){
     imageInterval = imageIntervalLong;
-    println("Increasing image interval");
+    println("Increasing image interval: "+ imageInterval);
+  } else if(imageInterval > imageIntervalShort) {
+    imageInterval = imageIntervalShort;
+    println("Decreasing image interval: " + imageInterval);
   }
 }
 
