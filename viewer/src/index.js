@@ -13,7 +13,7 @@ var fullscreenBodyClass = 'is-fullscreen';
 
 $(document).ready(function(){
 
-	fullscreenEvents();
+  fullscreenEvents();
 
   var config = {
     controls : false,
@@ -28,9 +28,9 @@ $(document).ready(function(){
         playerStill.pause();
         //playerStill.currentTime(170);
       });
-			playerStill.on('timeupdate', function(){
+      playerStill.on('timeupdate', function(){
         playerStill.pause();
-			});
+      });
       // Set dimensions
       setPlayerDimensions(playerStill);
       // Event - Window resize
@@ -45,7 +45,7 @@ $(document).ready(function(){
 
   player = videojs("gtp-video", config);
   player.ready(function(){
-		$('body').addClass('is-waiting');
+    $('body').addClass('is-waiting');
     // Pause because nothing to load yet.
     player.pause();
     // Set dimensions
@@ -73,21 +73,21 @@ $(document).ready(function(){
   })
 
   $fsButton.on('click', function(){
-		$('body').addClass(fullscreenBodyClass);
+    $('body').addClass(fullscreenBodyClass);
     if(window.ENV === 'gallery'){
       // player.requestFullscreen();
       launchFullscreen(document.documentElement);
     } else {
       player.requestFullscreen();
-		}
+    }
   });
 
   $playButton.on('click', function(){
-		console.log('click');
+    console.log('click');
     player.play();
-		if(playerStill){
-			playerStill.play();
-		}
+    if(playerStill){
+      playerStill.play();
+    }
   });
 
 });
@@ -106,45 +106,46 @@ function getCurrentCount(){
     url: '/count.json',
     // type of data we are expecting in return:
     dataType: 'json',
+    cache: false,
     success: currentCountSuccess,
     error: function(xhr, type){
-			setTimeout(getCurrentCount, 2000);
+      setTimeout(getCurrentCount, 2000);
     }
   })
 }
 
 function currentCountSuccess(data){
-	// console.log(data.count, count);
-	if(data === null || data.count === count){
-		$('body').addClass('is-waiting');
-		setTimeout(getCurrentCount, 2000);
-		return;
-	}
-	$('body').removeClass('is-waiting');
-	// Debug
-	// count = 324;
-	count = data.count;
-	setVideo();
-	setImage();
-	updateImageCount();
+  // console.log(data.count, count);
+  if(data === null || data.count === count){
+    $('body').addClass('is-waiting');
+    setTimeout(getCurrentCount, 2000);
+    return;
+  }
+  $('body').removeClass('is-waiting');
+  // Debug
+  // count = 324;
+  count = data.count;
+  setVideo();
+  setImage();
+  updateImageCount();
 }
 
 function fullscreenEvents(){
-	if (document.addEventListener){
-		document.addEventListener('webkitfullscreenchange', fullscreenEventHandler, false);
-		document.addEventListener('mozfullscreenchange', fullscreenEventHandler, false);
-		document.addEventListener('fullscreenchange', fullscreenEventHandler, false);
-		document.addEventListener('MSFullscreenChange', fullscreenEventHandler, false);
-	}
+  if (document.addEventListener){
+    document.addEventListener('webkitfullscreenchange', fullscreenEventHandler, false);
+    document.addEventListener('mozfullscreenchange', fullscreenEventHandler, false);
+    document.addEventListener('fullscreenchange', fullscreenEventHandler, false);
+    document.addEventListener('MSFullscreenChange', fullscreenEventHandler, false);
+  }
 }
 
 function fullscreenEventHandler(){
-	// console.log('event', document.webkitIsFullScreen);
-	if (document.webkitIsFullScreen === false || document.mozFullScreen  ===  false || document.msFullscreenElement === false ){
-		$('body').removeClass(fullscreenBodyClass);
-	} else {
-		$('body').addClass(fullscreenBodyClass);
-	}
+  // console.log('event', document.webkitIsFullScreen);
+  if (document.webkitIsFullScreen === false || document.mozFullScreen  ===  false || document.msFullscreenElement === false ){
+    $('body').removeClass(fullscreenBodyClass);
+  } else {
+    $('body').addClass(fullscreenBodyClass);
+  }
 }
 
 function updateImageCount(){
@@ -154,10 +155,10 @@ function updateImageCount(){
 
 function setImage(){
   var filename = '/images/out'+pad('00000', count)+'.png';
-	// var bgUrl = "url" + "("  + filename + ")";
+  // var bgUrl = "url" + "("  + filename + ")";
   $(".gtp-js-image-still").attr("src", filename);
   $(".gtp-js-image-still").parent().css("background-image", "url("+filename+")");
-	$(".gtp-js-image-still").hide();
+  $(".gtp-js-image-still").hide();
 }
 
 function setVideo(){
