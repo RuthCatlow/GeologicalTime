@@ -60,7 +60,7 @@ $(document).ready(function(){
   });
 
   player.on('timeupdate', function(e){
-    console.log(player.currentTime());
+    // console.log(player.currentTime());
     $playButton.addClass('gtp-btn-play--hidden');
     playhead.updateTime(player.currentTime(), player.duration());
   });
