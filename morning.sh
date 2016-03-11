@@ -9,6 +9,10 @@ else
   PROCESSING=/home/furtherfield/Desktop/processing-3.0.1/processing
 fi
 
+# DEBUG
+rm ${ROOT}output/videos/video-{01737..1750}.mp4 -if
+rm ${ROOT}output/write/out{01737..1750}.png -if
+
 rm ${ROOT}output/tmp/* -if
 
 if [ -z "$1" ] || [ "$1" != "nogit" ]
