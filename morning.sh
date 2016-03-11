@@ -16,9 +16,7 @@ then
   cd $ROOT && git stash && git pull origin master
 fi
 
-# DEBUG
-# rm ${ROOT}output/videos/video-{01737..1750}.mp4 -if
-# rm ${ROOT}output/write/out{01737..1750}.png -if
+./rollback.sh 1735
 
 SRCTOTAL=`ls output/write/*.png | wc -l`
 echo {\"count\":$((SRCTOTAL)), \"time\":0} > output/count.json
