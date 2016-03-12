@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TOTAL=`ls output/write/*.png | wc -l`
-NEWTOTAL=${1}
+NEWTOTAL=1735
 DIFF=`expr $TOTAL - $NEWTOTAL`
 
 # Remove the last files created (lowest numbers)
