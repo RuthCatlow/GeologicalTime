@@ -20,7 +20,7 @@ var mailOptions = {
 };
 
 require('winston-mail').Mail;
-winston.add(winston.transports.Mail, mailOptions);
+// winston.add(winston.transports.Mail, mailOptions);
 // winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp: true});
 
 program
