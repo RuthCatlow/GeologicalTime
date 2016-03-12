@@ -206,7 +206,7 @@ void draw() {
       getJson();
       imageCount++;
       latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
-      startMunge();
+      // startMunge();
     } else {
        println("Skipping");
     }
