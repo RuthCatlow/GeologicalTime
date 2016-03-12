@@ -16,7 +16,7 @@ String outputDirectory = rootDirectory+"output/";
 
 int imageIntervalShort = 180;                  // seconds
 int imageIntervalLong = 360;                   // seconds
-int imageInterval = imageIntervalShort;        // seconds
+int imageInterval = imageIntervalLong;        // seconds
 int overThresholdCount = 0;
 
 int freezeDuration = 3000;                     // milliseconds
@@ -120,8 +120,8 @@ void getJson(){
     imageInterval = imageIntervalLong;
     println("Increasing image interval: "+ imageInterval);
   } else if(imageInterval > imageIntervalShort) {
-    imageInterval = imageIntervalShort;
-    println("Decreasing image interval: " + imageInterval);
+    // imageInterval = imageIntervalShort;
+    // println("Decreasing image interval: " + imageInterval);
   }
 }
 
