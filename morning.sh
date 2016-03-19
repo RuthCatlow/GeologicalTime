@@ -16,8 +16,6 @@ then
   cd $ROOT && git stash && git pull origin master
 fi
 
-# ./rollback.sh 1735
-
 SRCTOTAL=`ls output/write/*.png | wc -l`
 echo {\"count\":$((SRCTOTAL)), \"time\":0} > output/count.json
 

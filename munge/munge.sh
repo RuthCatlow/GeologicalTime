@@ -25,8 +25,8 @@ var mailOptions = {
 };
 
 require('winston-mail').Mail;
-// winston.add(winston.transports.Mail, mailOptions);
-// winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
+winston.add(winston.transports.Mail, mailOptions);
+winston.add(winston.transports.File, {filename: __dirname+'/munge.log', timestamp: true});
 
 program
   .version('0.0.1')
