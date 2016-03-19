@@ -16,7 +16,7 @@ String outputDirectory = rootDirectory+"output/";
 
 int imageIntervalShort = 180;                  // seconds
 int imageIntervalLong = 360;                   // seconds
-int imageInterval = imageIntervalLong;        // seconds
+int imageInterval = imageIntervalShort;        // seconds
 int overThresholdCount = 0;
 
 int freezeDuration = 3000;                     // milliseconds
@@ -117,8 +117,8 @@ void getJson(){
   }
 
   if(overThresholdCount >= 1){
-    imageInterval = imageIntervalLong;
-    println("Increasing image interval: "+ imageInterval);
+    // imageInterval = imageIntervalLong;
+    // println("Increasing image interval: "+ imageInterval);
   } else if(imageInterval > imageIntervalShort) {
     // imageInterval = imageIntervalShort;
     // println("Decreasing image interval: " + imageInterval);
@@ -206,7 +206,7 @@ void draw() {
       getJson();
       imageCount++;
       latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
-      startMunge();
+      // startMunge();
     } else {
        println("Skipping");
     }

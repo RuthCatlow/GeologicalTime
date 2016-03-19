@@ -49,21 +49,35 @@ var mkdirSync = function (path) {
 
 mkdirSync(program.output+'/write');
 
-var re = /0*([1-9][0-9]*|0)/;
-var tmpDirList = fileList(program.output+'/tmp');
-var writeDirList = fileList(program.output+'/write');
-// If more than one image then we're playing catch up.
-if(tmpDirList.length <= 1){
-	// Check if next image in tmp is the next in order.
-	var match = tmpDirList[0].match(re);
-	if(match == null || match[1] != writeDirList.length+1){
-		winston.log('error', 'Image in tmp/ is not the next image.');
-	} else {
-		winston.log('info', '<<<<<<<<<<<<<<< Starting image reordering >>>>>>>>>>>>>>>>>>>');
-		reorderImages();
-	}
-} else {
-	winston.log('error', 'Too many images in tmp: ', tmpDirList.length);
+// Check if lock file is present. i.e. process is active.
+var locked = false;
+try {
+  fs.accessSync(program.output+'/lock', fs.F_OK);
+  // winston.log('error', 'Locked. Cannot continue.');
+  locked = true;
+} catch (e) {
+  winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
+}
+
+if(locked == false){
+
+  var re = /0*([1-9][0-9]*|0)/;
+  var tmpDirList = fileList(program.output+'/tmp');
+  var writeDirList = fileList(program.output+'/write');
+  // If more than one image then we're playing catch up.
+  if(tmpDirList.length <= 1){
+  	// Check if next image in tmp is the next in order.
+  	var match = tmpDirList[0].match(re);
+    if(match == null || match[1] != writeDirList.length+1){
+      winston.log('error', 'Image in tmp/ is not the next image. ' + match[1] + " - " + (writeDirList.length+1));
+    } else {
+  		winston.log('info', 'Starting image reordering');
+  		fs.writeFile(program.output+'/lock', match[1]);
+      reorderImages();
+  	}
+  } else {
+  	winston.log('error', 'Too many images in tmp: ', tmpDirList.length);
+  }
 }
 
 function reorderImages(){
@@ -102,7 +116,7 @@ function writeVideo(){
   var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
 	// http://stackoverflow.com/a/24697998/970059
-
+ 
 	var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
@@ -121,7 +135,7 @@ function writeVideo(){
 
 	if(images.length > 2){
 		args = args.concat(argsAdvanced);
-	}
+	}  
 
 	// Ensure min out frame rate of {minOutFrameRate}
 	if(images.length < program.duration*minOutFrameRate){
@@ -139,7 +153,8 @@ function writeVideo(){
   };
   winston.log('info', 'Start encoding: ffmpeg '+ args.join(' '));
   run_cmd(
-    'ffmpeg', args, config, function(numFiles){
+    '/usr/local/bin/ffmpeg', args, config, function(numFiles){
+      winston.log('info', 'Complete');
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
       uploadVideo(outputFile, numFiles, secs);
@@ -174,6 +189,8 @@ function run_cmd(cmd, args, config, callback ) {
   var spawn = require('child_process').spawn;
   var child = spawn(cmd, args, config);
   var resp = "";
+
+  // winston.log('info', config);
 
   if(config.detached === true){
     return;
