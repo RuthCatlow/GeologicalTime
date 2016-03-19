@@ -75,9 +75,6 @@ function ftpSend(count){
             fs.unlinkSync(image, function(){
               winston.info('Image deleted');
             });
-            fs.unlinkSync(program.output+'/lock', function(){
-              winston.info('Unlocked');
-            });
             c.end();
           }
         });
