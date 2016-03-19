@@ -15,6 +15,8 @@ var program = require('commander');
 var walk = require('walk');
 var rmraf = require('rimraf');
 
+var ffmpeg = process.env.GTP_FFMPEG || '/usr/local/bin/ffmpeg';
+
 var mailOptions = {
 	to: 'gareth.foote@gmail.com',
 	from: 'gtp@garethfoote.co.uk',
@@ -65,19 +67,15 @@ if(locked == false){
   var tmpDirList = fileList(program.output+'/tmp');
   var writeDirList = fileList(program.output+'/write');
   // If more than one image then we're playing catch up.
-  if(tmpDirList.length <= 1){
-  	// Check if next image in tmp is the next in order.
-  	var match = tmpDirList[0].match(re);
-    if(match == null || match[1] != writeDirList.length+1){
-      winston.log('error', 'Image in tmp/ is not the next image. ' + match[1] + " - " + (writeDirList.length+1));
-    } else {
-  		winston.log('info', 'Starting image reordering');
-  		fs.writeFile(program.output+'/lock', match[1]);
-      reorderImages();
-  	}
-  } else {
-  	winston.log('error', 'Too many images in tmp: ', tmpDirList.length);
-  }
+	// Check if next image in tmp is the next in order.
+	var match = tmpDirList[0].match(re);
+	if(match == null || match[1] != writeDirList.length+1){
+		winston.log('error', 'Image in tmp/ is not the next image. ' + match[1] + " - " + (writeDirList.length+1));
+	} else {
+		winston.log('info', 'Starting image reordering');
+		fs.writeFile(program.output+'/lock', match[1]);
+		reorderImages();
+	}
 }
 
 function reorderImages(){
@@ -92,6 +90,8 @@ function reorderImages(){
 
 	run_cmd(
 		__dirname+'/reorder.sh', args, config, function(numFiles){
+			images = fileList(program.output+'/write');
+			writeCount();
 			writeVideo();
 		}
 	);
@@ -109,14 +109,13 @@ function fileList(dir) {
 }
 
 function writeVideo(){
-	images = fileList(program.output+'/write');
 	winston.log('info', 'Reordered '+ images.length + ' images' );
 
 	var minOutFrameRate = 12;
   var inputFrameRate = 1/(program.duration/images.length);
   var outputFile = program.output+'/videos/video-'+pad('00000', images.length)+'.mp4';
 	// http://stackoverflow.com/a/24697998/970059
- 
+
 	var args = [
     '-f', 'image2',
     '-r', inputFrameRate,
@@ -135,7 +134,7 @@ function writeVideo(){
 
 	if(images.length > 2){
 		args = args.concat(argsAdvanced);
-	}  
+	}
 
 	// Ensure min out frame rate of {minOutFrameRate}
 	if(images.length < program.duration*minOutFrameRate){
@@ -153,36 +152,18 @@ function writeVideo(){
   };
   winston.log('info', 'Start encoding: ffmpeg '+ args.join(' '));
   run_cmd(
-    '/usr/local/bin/ffmpeg', args, config, function(numFiles){
+    ffmpeg, args, config, function(numFiles){
       winston.log('info', 'Complete');
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
-      uploadVideo(outputFile, numFiles, secs);
+			writeCount(secs);
     }
   );
 }
 
-function uploadVideo(filePath, numFiles, time){
-  var args = [
-    '-f', filePath,
-    '-i', program.output + "/tmp/out"+pad('00000', images.length)+'.png'
-  ];
-
-  var config = {
-    detached : true,
-    stdio: ['ignore', 'ignore', 'ignore']
-  };
-
+function writeCount(time){
   // Write file count before
-  fs.writeFile(program.output + "/count.json", JSON.stringify({count:numFiles, time: time }), function(err) {
-    if(err) {
-      winston.log('error', err);
-      return
-    }
-  	winston.log('info', 'Starting upload');
-   	run_cmd(__dirname+'/ftp.sh', args, config, function(){});
-    process.exit();
-  });
+  fs.writeFileSync(program.output + "/count.json", JSON.stringify({count:images.length, time: time }));
 }
 
 function run_cmd(cmd, args, config, callback ) {
@@ -198,7 +179,7 @@ function run_cmd(cmd, args, config, callback ) {
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
   child.stdout.on('end', function() {
-    callback(images.length);
+    callback();
   });
   child.stdout.on('error', function() { console.log('err') });
 }
