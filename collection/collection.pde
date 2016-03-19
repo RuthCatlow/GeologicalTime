@@ -103,7 +103,7 @@ void getJson(){
     imageCount = 0;
     encodingTime = 0;
   } else {
-    imageCount = json.getInt("count");
+    imageCount = imagesInDir(outputDirectory+"write/");
     encodingTime = json.getInt("time");
   }
 
@@ -202,7 +202,7 @@ void draw() {
     // Save image into tmp directory for copying.
 
     String copyDirectory = outputDirectory+"tmp/";
-    if(imagesInDir(copyDirectory) == 0){
+    if(imagesInDir(copyDirectory) < 50){
       getJson();
       imageCount++;
       latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
