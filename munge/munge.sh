@@ -66,19 +66,7 @@ try {
 
 if(locked == false){
   winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
-
-  var re = /0*([1-9][0-9]*|0)/;
-  var tmpDirList = fileList(program.output+'/tmp');
-  var writeDirList = fileList(program.output+'/write');
-  // If more than one image then we're playing catch up.
-	// Check if next image in tmp is the next in order.
-	var match = tmpDirList[0].match(re);
-	if(match == null || match[1] != writeDirList.length+1){
-		winston.log('error', 'Image in tmp/ is not the next image. ' + match[1] + " - " + (writeDirList.length+1));
-	} else {
-		winston.log('info', 'Starting image reordering');
-		reorderImages();
-	}
+	reorderImages();
 }
 
 function reorderImages(){
@@ -94,7 +82,6 @@ function reorderImages(){
 	run_cmd(
 		__dirname+'/reorder.sh', args, config, function(numFiles){
 			images = fileList(program.output+'/write');
-			writeCount();
 			writeVideo();
 		}
 	);
@@ -159,16 +146,10 @@ function writeVideo(){
       winston.log('info', 'Complete');
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
-			writeCount(secs);
     }
   );
 	fs.writeFile(program.output+'/pid', pid);
 	// winston.log('info', "Process id: " + pid);
-}
-
-function writeCount(time){
-  // Write file count before
-  fs.writeFileSync(program.output + "/count.json", JSON.stringify({count:images.length, time: time }));
 }
 
 function run_cmd(cmd, args, config, callback ) {

@@ -39,6 +39,8 @@ function ftpSend(count){
   console.log(image);
   console.log(video);
 
+  fs.writeFileSync(program.output + "/count.json", JSON.stringify({count:count}));
+
   var options = {
     host: process.env.GTP_HOST,
     username: process.env.GTP_USER,
