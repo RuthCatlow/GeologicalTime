@@ -17,6 +17,7 @@ var rmraf = require('rimraf');
 
 var ffmpeg = process.env.GTP_FFMPEG || '/usr/local/bin/ffmpeg';
 var running = require('is-running')
+var fileExists = require('file-exists');
 
 var mailOptions = {
 	to: 'gareth.foote@gmail.com',
@@ -56,17 +57,29 @@ mkdirSync(program.output+'/write');
 var locked = false
 var pid = 0;
 try {
-	pid = fs.readFileSync(program.output+'/pid', 'utf8');
-	if(running(pid)){
+	ffmpegPid = fs.readFileSync(program.output+'/ffmpeg-pid', 'utf8');
+	reorderPid = fs.readFileSync(program.output+'/reorder-pid', 'utf8');
+	if(running(ffmpegPid) || running(reorderPid)){
   	locked = true;
-  	winston.log('info', 'FFMPEG process is running: ' + pid);
+  	winston.log('info', 'A process is running');
 	}
 } catch (e) {
 }
 
 if(locked == false){
-  winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
-	reorderImages();
+
+	var videoDirList = fileList(program.output+'/videos').reverse();
+  var writeDirList = fileList(program.output+'/write');
+	var nextFileNumber = writeDirList.length+1;
+  var nextTmpFile = program.output+'/tmp/out'+pad('00000', nextFileNumber)+'.png';
+  var nextVideoFile = program.output+'/videos/video-'+pad('00000', nextFileNumber)+'.mp4';
+
+	if(fileExists(nextTmpFile) && !fileExists(nextVideoFile)){
+  	winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
+		reorderImages();
+	} else {
+		console.log('Tmp file exists:', fileExists(nextTmpFile), "Video file doesn't exist:", !fileExists(nextVideoFile));
+	}
 }
 
 function reorderImages(){
@@ -79,18 +92,19 @@ function reorderImages(){
 		stdio: ['pipe', 'pipe', 'pipe']
 	};
 
-	run_cmd(
+	var pid = run_cmd(
 		__dirname+'/reorder.sh', args, config, function(numFiles){
 			images = fileList(program.output+'/write');
 			writeVideo();
 		}
 	);
+	fs.writeFile(program.output+'/reorder-pid', pid);
 }
 
 function fileList(dir) {
   return fs.readdirSync(dir).reduce(function(list, file) {
     var name = [dir, file].join('/');
-		if(['png', 'jpg', 'jpeg'].indexOf(file.split('.').pop().toLowerCase()) === -1){
+		if(['png', 'jpg', 'jpeg', 'mp4'].indexOf(file.split('.').pop().toLowerCase()) === -1){
 			return list;
 		}
     var isDir = fs.statSync(name).isDirectory();
@@ -148,7 +162,7 @@ function writeVideo(){
   		winston.log('info', 'Complete in ' + secs  + 's');
     }
   );
-	fs.writeFile(program.output+'/pid', pid);
+	fs.writeFile(program.output+'/ffmpeg-pid', pid);
 	// winston.log('info', "Process id: " + pid);
 }
 
