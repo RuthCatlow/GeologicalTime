@@ -103,7 +103,7 @@ void getJson(){
     imageCount = 0;
     encodingTime = 0;
   } else {
-    imageCount = imagesInDir(outputDirectory+"write/");
+    imageCount = imagesInDir(outputDirectory+"write/") + imagesInDir(outputDirectory+"tmp/");
     encodingTime = json.getInt("time");
   }
 
