@@ -21,6 +21,7 @@
   "dependencies": {
     "commander": "^2.9.0",
     "dotenv": "^1.2.0",
+    "file-exists": "^1.0.0",
     "ftp": "^0.3.10",
     "is-running": "^2.0.0",
     "rimraf": "^2.5.0",
