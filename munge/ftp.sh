@@ -93,7 +93,7 @@ function logError(file, err){
   throw err;
 }
 
-var url = 'http://gtp.ruthcatlow.net/test/count.json?_cb='+(new Date()).getTime();
+var url = 'http://gtp.ruthcatlow.net/count.json?_cb='+(new Date()).getTime();
 
 http.get(url, function(res){
   var body = '';
@@ -111,6 +111,8 @@ http.get(url, function(res){
     if(match[1] > response.count){
       ftpSend(match[1]);
     }
+    console.log("Ready to upload: " +match[1]);
+    console.log("Current latest: " +response.count);
   });
 }).on('error', function(e){
   console.log("Got an error: ", e);
