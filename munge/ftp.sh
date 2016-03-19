@@ -104,20 +104,13 @@ http.get(url, function(res){
 
   res.on('end', function(){
     var response = JSON.parse(body);
-    console.log("Got a response: ", response.count);
-
     var re = /0*([1-9][0-9]*|0)/;
     var videoDirList = fileList(program.output+'/videos').reverse();
     // Not the most recent because it could still be encoding.
     var match = videoDirList[1].match(re);
     if(match[1] > response.count){
-      // console.log('upload');
-      // console.log(match[1]);
       ftpSend(match[1]);
-    } else {
-      console.log('do not upload');
     }
-
   });
 }).on('error', function(e){
   console.log("Got an error: ", e);
