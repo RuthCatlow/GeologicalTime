@@ -9,7 +9,7 @@ else
   PROCESSING=/home/furtherfield/Desktop/processing-3.0.1/processing
 fi
 
-rm ${ROOT}output/tmp/* -if
+# rm ${ROOT}output/tmp/* -if
 
 if [ -z "$1" ] || [ "$1" != "nogit" ]
 then
