@@ -16,6 +16,7 @@ var walk = require('walk');
 var rmraf = require('rimraf');
 
 var ffmpeg = process.env.GTP_FFMPEG || '/usr/local/bin/ffmpeg';
+var running = require('is-running')
 
 var mailOptions = {
 	to: 'gareth.foote@gmail.com',
@@ -52,16 +53,19 @@ var mkdirSync = function (path) {
 mkdirSync(program.output+'/write');
 
 // Check if lock file is present. i.e. process is active.
-var locked = false;
+var locked = false
+var pid = 0;
 try {
-  fs.accessSync(program.output+'/lock', fs.F_OK);
-  // winston.log('error', 'Locked. Cannot continue.');
-  locked = true;
+	pid = fs.readFileSync(program.output+'/pid', 'utf8');
+	if(running(pid)){
+  	locked = true;
+  	winston.log('info', 'FFMPEG process is running: ' + pid);
+	}
 } catch (e) {
-  winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
 }
 
 if(locked == false){
+  winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
 
   var re = /0*([1-9][0-9]*|0)/;
   var tmpDirList = fileList(program.output+'/tmp');
@@ -73,7 +77,6 @@ if(locked == false){
 		winston.log('error', 'Image in tmp/ is not the next image. ' + match[1] + " - " + (writeDirList.length+1));
 	} else {
 		winston.log('info', 'Starting image reordering');
-		fs.writeFile(program.output+'/lock', match[1]);
 		reorderImages();
 	}
 }
@@ -151,7 +154,7 @@ function writeVideo(){
     stdio: ['pipe', 'pipe', 'pipe']
   };
   winston.log('info', 'Start encoding: ffmpeg '+ args.join(' '));
-  run_cmd(
+  var pid = run_cmd(
     ffmpeg, args, config, function(numFiles){
       winston.log('info', 'Complete');
       var secs = elapsedTime();
@@ -159,6 +162,8 @@ function writeVideo(){
 			writeCount(secs);
     }
   );
+	fs.writeFile(program.output+'/pid', pid);
+	// winston.log('info', "Process id: " + pid);
 }
 
 function writeCount(time){
@@ -174,7 +179,7 @@ function run_cmd(cmd, args, config, callback ) {
   // winston.log('info', config);
 
   if(config.detached === true){
-    return;
+    return child.pid;
   }
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
@@ -182,6 +187,7 @@ function run_cmd(cmd, args, config, callback ) {
     callback();
   });
   child.stdout.on('error', function() { console.log('err') });
+	return child.pid;
 }
 
 function pad(pad, str) {
