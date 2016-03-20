@@ -1,3 +1,7 @@
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.io.FileFilter;
 import java.io.InputStreamReader;
 import java.io.File;
 import java.util.Date;
@@ -10,7 +14,7 @@ BufferedReader reader;
 Capture cam;
 String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
-// String rootDirectory = "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/";
+//String rootDirectory = "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/";
 String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
 String outputDirectory = rootDirectory+"output/";
 
@@ -39,6 +43,12 @@ void settings() {
 
 void setup() {
   background(0);
+  
+  String filename = lastFileModified(outputDirectory+"tmp/");
+  if(filename == ""){
+    filename = lastFileModified(outputDirectory+"write/");
+  }
+  imageCount = fileNumber(filename);
 
   String[] cameras = Capture.list();
   String mostRecentLog;
@@ -87,46 +97,10 @@ void setup() {
   camScreenY = (height - camScreenHeight)/2;
 
   makeDir(outputDirectory+"tmp/");
-  getJson();
-
   // println(0 + " " + camScreenY + " " + width  + " " + camScreenHeight);
 }
 
-void getJson(){
-  JSONObject json = null;
-  File jsonFile = new File(outputDirectory+"count.json");
-  if(jsonFile.exists() == true){
-    json = loadJSONObject(outputDirectory+"count.json");
-  }
-
-  if(json == null){
-    imageCount = 0;
-    encodingTime = 0;
-  } else {
-    imageCount = imagesInDir(outputDirectory+"write/") + imagesInDir(outputDirectory+"tmp/");
-    encodingTime = json.getInt("time");
-  }
-
-  // Check encoding isn't getting too close to our
-  // interval time.
-  if(encodingTime > round(imageIntervalShort*0.8)){
-    overThresholdCount++;
-    println("Over threshold:" + overThresholdCount);
-  } else {
-    overThresholdCount = 0;
-  }
-
-  if(overThresholdCount >= 1){
-    // imageInterval = imageIntervalLong;
-    // println("Increasing image interval: "+ imageInterval);
-  } else if(imageInterval > imageIntervalShort) {
-    // imageInterval = imageIntervalShort;
-    // println("Decreasing image interval: " + imageInterval);
-  }
-}
-
 void draw() {
-
   // Is camera available
   if (cam.available() == true) {
     cam.read();
@@ -203,7 +177,6 @@ void draw() {
 
     String copyDirectory = outputDirectory+"tmp/";
     if(imagesInDir(copyDirectory) < 50){
-      getJson();
       imageCount++;
       latestImage.save(copyDirectory+String.format("out%05d.png", imageCount));
       // startMunge();
@@ -251,4 +224,34 @@ int imagesInDir(String dirPath){
   String[] theList = theDir.list();
   int fileCount = theList.length;
   return fileCount;
+}
+
+
+int fileNumber(String filename) {
+  String pattern = "0*([1-9][0-9]*|0)";
+  Pattern r = Pattern.compile(pattern);
+  Matcher m = r.matcher(filename);
+
+  if (m.find( )) {
+     return int(m.group(0)); 
+  } else {
+     return 0;
+  }
+}
+
+String lastFileModified(String dir) {
+  File fl = new File(dir);
+  File[] files = fl.listFiles(new FileFilter() {          
+    public boolean accept(File file) {
+      return true;
+    }
+  });
+
+  if(files.length > 0){
+    Arrays.sort(files);
+    return files[files.length-1].getName();
+  } else {
+     return ""; 
+  }
+  
 }
