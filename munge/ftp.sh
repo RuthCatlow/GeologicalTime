@@ -11,6 +11,8 @@ var winston = require('winston');
 var ssh2 = require("ssh2");
 var http = require("http");
 
+var fileExists = require('file-exists');
+
 var mailOptions = {
 	to: 'gareth.foote@gmail.com',
 	from: 'gtp@garethfoote.co.uk',
@@ -40,8 +42,10 @@ function ftpSend(fileNum){
 
   var image = program.output + "/tmp/out"+pad('00000', fileNum)+'.png'
   var video = program.output + "/videos/video-"+pad('00000', fileNum)+'.mp4'
-  console.log(image);
-  console.log(video);
+
+  fs.unlinkSync(program.output + "/count.json", function(){
+    winston.info('info', 'Count json deleted whilst uploading');
+  });
 
   var options = {
     host: process.env.GTP_HOST,
@@ -104,15 +108,13 @@ function finish(image, fileNum){
 
 }
 
-
-function logError(file, err){
-  winston.log('error', 'Error uploading: '+file);
-  winston.log('error', JSON.stringify(err));
-  throw err;
+// Do not continue if count is missing.
+if(!fileExists(program.output + "/count.json")){
+  winston.log('info', 'count.json missing so is currently uploading.');
+  return;
 }
 
-var json = JSON.parse(require('fs').readFileSync(program.output + "/count.json", 'utf8'));
-
+// Check if anything to upload.
 var re = /0*([1-9][0-9]*|0)/;
 var videoDirList = fileList(program.output+'/videos').reverse();
 var tmpDirList = fileList(program.output+'/tmp');
@@ -120,14 +122,13 @@ var matchTmp = tmpDirList[0].match(re);
 // The second to most recent because the first could be encoding still.
 var matchVid = videoDirList[1].match(re);
 if(matchTmp[1] <= matchVid[1]){
-  winston.log('info', 'Send:': matchTmp[1]);
+  winston.log('info', 'Send:'+ matchTmp[1]);
   ftpSend(matchTmp[1]);
 } else {
   winston.log('info', 'Nothing to send');
 }
 console.log("Ready to upload vid: " +matchVid[1]);
 console.log("Ready to upload tmp: " +matchTmp[1]);
-// console.log(json);
 
 function fileList(dir) {
   return fs.readdirSync(dir).reduce(function(list, file) {
@@ -142,4 +143,10 @@ function fileList(dir) {
 
 function pad(pad, str) {
   return (pad + str).slice(-pad.length);
+}
+
+function logError(file, err){
+  winston.log('error', 'Error uploading: '+file);
+  winston.log('error', JSON.stringify(err));
+  throw err;
 }
