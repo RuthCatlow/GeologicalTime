@@ -9,14 +9,13 @@ else
   PROCESSING=/home/furtherfield/Desktop/processing-3.0.1/processing
 fi
 
-rm ${ROOT}output/tmp/* -if
+# rm ${ROOT}output/tmp/* -if
 
 if [ -z "$1" ] || [ "$1" != "nogit" ]
 then
   cd $ROOT && git stash && git pull origin master
 fi
 
-SRCTOTAL=`ls output/write/*.png | wc -l`
-echo {\"count\":$((SRCTOTAL)), \"time\":0} > output/count.json
+curl http://gtp.ruthcatlow.net/count.json > output/count.json
 
 ${PROCESSING} ${ROOT}collection/collection.pde
