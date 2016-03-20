@@ -57,13 +57,15 @@ mkdirSync(program.output+'/write');
 var locked = false
 var pid = 0;
 try {
-	ffmpegPid = fs.readFileSync(program.output+'/ffmpeg-pid', 'utf8');
-	reorderPid = fs.readFileSync(program.output+'/reorder-pid', 'utf8');
+	var ffmpegPid = fs.readFileSync(program.output+'/ffmpeg-pid', 'utf8');
+	var reorderPid = fs.readFileSync(program.output+'/reorder-pid', 'utf8');
+
 	if(running(ffmpegPid) || running(reorderPid)){
   	locked = true;
   	winston.log('info', 'A process is running');
 	}
 } catch (e) {
+	// console.log(e);
 }
 
 if(locked == false){
