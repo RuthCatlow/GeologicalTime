@@ -20,6 +20,10 @@ var mailOptions = {
 	password: process.env.GTP_PASSWORD
 };
 
+var baseDirectory = process.env.GTP_BASE_DIR;
+var c = new ssh2();
+var sftp;
+
 require('winston-mail').Mail;
 winston.add(winston.transports.Mail, mailOptions);
 winston.add(winston.transports.File, {filename: __dirname+'/ftp.log', timestamp: true});
@@ -31,38 +35,34 @@ program
   .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
   .parse(process.argv);
 
-function ftpSend(count){
+function ftpSend(fileNum){
   winston.log('info', '<<<<<<<<<<<< SFTP client connecting >>>>>>>>>>>>');
 
-  var image = program.output + "/tmp/out"+pad('00000', count)+'.png'
-  var video = program.output + "/videos/video-"+pad('00000', count)+'.mp4'
+  var image = program.output + "/tmp/out"+pad('00000', fileNum)+'.png'
+  var video = program.output + "/videos/video-"+pad('00000', fileNum)+'.mp4'
   console.log(image);
   console.log(video);
-
-  fs.writeFileSync(program.output + "/count.json", JSON.stringify({count:count}));
 
   var options = {
     host: process.env.GTP_HOST,
     username: process.env.GTP_USER,
     password: process.env.GTP_PASSWORD
   };
-  var baseDirectory = process.env.GTP_BASE_DIR;
   var files = [
     { src: video, dest: baseDirectory+'videos/'+path.basename(video) },
     { src: image, dest: baseDirectory+'images/'+path.basename(image) },
-    { src: program.output+'/count.json', dest: baseDirectory+'count.json' }
   ];
   var count = 0;
 
-  var c = new ssh2();
   c.on('ready', function () {
     winston.log('info', 'SFTP client ready');
 
-    c.sftp(function (err, sftp) {
+    c.sftp(function (err, _sftp) {
       if(err) {
         winston.log('error', err);
         throw err;
       }
+      sftp = _sftp;
 
       files.forEach(function(file){
         sftp.fastPut(file.src, file.dest, {}, function (err) {
@@ -72,10 +72,7 @@ function ftpSend(count){
           }
           winston.log('info', 'Uploaded: ' + file.src);
           if(count === files.length){
-            fs.unlinkSync(image, function(){
-              winston.info('Image deleted');
-            });
-            c.end();
+            finish(image, fileNum);
           }
         });
       });
@@ -86,37 +83,51 @@ function ftpSend(count){
   c.connect(options);
 }
 
+function finish(image, fileNum){
+
+  // Delete image
+  fs.unlinkSync(image, function(){
+    winston.info('Image deleted');
+  });
+
+  // Create count.json
+  fs.writeFileSync(program.output + "/count.json", JSON.stringify({count:fileNum}));
+
+  // Upload count.json.
+  sftp.fastPut(program.output+'/count.json', baseDirectory+'count.json', {}, function (err) {
+    if(err) {
+      logError(file.src, err);
+    }
+    winston.log('info', 'Uploaded: count.json');
+    c.end();
+  });
+
+}
+
+
 function logError(file, err){
   winston.log('error', 'Error uploading: '+file);
   winston.log('error', JSON.stringify(err));
   throw err;
 }
 
-var url = 'http://gtp.ruthcatlow.net/count.json?_cb='+(new Date()).getTime();
+var json = JSON.parse(require('fs').readFileSync(program.output + "/count.json", 'utf8'));
 
-http.get(url, function(res){
-  var body = '';
-
-  res.on('data', function(chunk){
-    body += chunk;
-  });
-
-  res.on('end', function(){
-    var response = JSON.parse(body);
-    var re = /0*([1-9][0-9]*|0)/;
-    var videoDirList = fileList(program.output+'/videos').reverse();
-    // Not the most recent because it could still be encoding.
-    var match = videoDirList[1].match(re);
-    if(match[1] > response.count){
-      ftpSend(match[1]);
-    }
-    console.log("Ready to upload: " +match[1]);
-    console.log("Current latest: " +response.count);
-  });
-}).on('error', function(e){
-  console.log("Got an error: ", e);
-});
-
+var re = /0*([1-9][0-9]*|0)/;
+var videoDirList = fileList(program.output+'/videos').reverse();
+var tmpDirList = fileList(program.output+'/tmp');
+var matchTmp = tmpDirList[0].match(re);
+// The second to most recent because the first could be encoding still.
+var matchVid = videoDirList[1].match(re);
+if(matchTmp[1] <= matchVid[1]){
+  winston.log('info', 'Send:': matchTmp[1]);
+  ftpSend(matchTmp[1]);
+} else {
+  winston.log('info', 'Nothing to send');
+}
+console.log("Ready to upload vid: " +matchVid[1]);
+console.log("Ready to upload tmp: " +matchTmp[1]);
+// console.log(json);
 
 function fileList(dir) {
   return fs.readdirSync(dir).reduce(function(list, file) {
