@@ -108,11 +108,11 @@ function finish(image, fileNum){
 
 }
 
-// Do not continue if count is missing.
+/* Do not continue if count is missing.
 if(!fileExists(program.output + "/count.json")){
   winston.log('info', 'count.json missing so is currently uploading.');
   return;
-}
+}*/
 
 // Check if anything to upload.
 var re = /0*([1-9][0-9]*|0)/;
