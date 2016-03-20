@@ -159,12 +159,12 @@ function writeVideo(){
   winston.log('info', 'Start encoding: ffmpeg '+ args.join(' '));
   var pid = run_cmd(
     ffmpeg, args, config, function(numFiles){
-      winston.log('info', 'Complete');
       var secs = elapsedTime();
   		winston.log('info', 'Complete in ' + secs  + 's');
     }
   );
-	fs.writeFile(program.output+'/ffmpeg-pid', pid);
+
+  fs.writeFile(program.output+'/ffmpeg-pid', pid);
 	// winston.log('info', "Process id: " + pid);
 }
 
@@ -180,6 +180,7 @@ function run_cmd(cmd, args, config, callback ) {
   }
 
   child.stdout.on('data', function (buffer) { console.log(buffer) });
+  child.stderr.on('data', function (buffer) { });
   child.stdout.on('end', function() {
     callback();
   });
