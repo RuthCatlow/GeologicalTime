@@ -1,7 +1,7 @@
 #!/bin/bash
 
 TOTAL=`ls output/write/*.png | wc -l`
-NEWTOTAL=1740
+NEWTOTAL=1733
 DIFF=`expr $TOTAL - $NEWTOTAL`
 
 # Remove the last files created (lowest numbers)
@@ -12,8 +12,8 @@ do
   VIDEOFILE=`printf "output/videos/video-%05d.mp4" $VIDEOINDEX`
   rm $IMAGEFILE -f
   echo "DELETE IMAGE $IMAGEFILE"
-  # rm $VIDEOFILE -f
-  #echo "DELETE VIDEO $VIDEOFILE"
+  rm $VIDEOFILE -f
+  echo "DELETE VIDEO $VIDEOFILE"
 done
 
 # Reorder files.
