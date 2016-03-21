@@ -17,6 +17,7 @@ gulp.task('default', function () {
 		'dist/*.css',
 		'dist/*.js',
 		'index.html',
+		'test.html',
 		'gallery.html',
     'assets/**/*',
     'favicon.ico'

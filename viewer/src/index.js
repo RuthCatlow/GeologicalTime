@@ -124,7 +124,12 @@ function currentCountSuccess(data){
   $('body').removeClass('is-waiting');
   // Debug
   // count = 324;
-  count = data.count;
+  if(window.FORCE){
+    count = window.FORCE;
+  } else {
+    count = data.count;
+  }
+  console.log("count:"+count);
   setVideo();
   setImage();
   updateImageCount();
