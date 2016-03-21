@@ -43,10 +43,11 @@ function ftpSend(fileNum){
   var image = program.output + "/tmp/out"+pad('00000', fileNum)+'.png'
   var video = program.output + "/videos/video-"+pad('00000', fileNum)+'.mp4'
 
+/*
   fs.unlinkSync(program.output + "/count.json", function(){
     winston.info('info', 'Count json deleted whilst uploading');
   });
-
+*/
   var options = {
     host: process.env.GTP_HOST,
     username: process.env.GTP_USER,
