@@ -18,7 +18,7 @@ String logFilename = "log.txt";
 String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
 String outputDirectory = rootDirectory+"output/";
 
-int imageIntervalShort = 180;                  // seconds
+int imageIntervalShort = 240;                  // seconds
 int imageIntervalLong = 360;                   // seconds
 int imageInterval = imageIntervalShort;        // seconds
 int overThresholdCount = 0;
@@ -43,7 +43,7 @@ void settings() {
 
 void setup() {
   background(0);
-  
+
   String filename = lastFileModified(outputDirectory+"tmp/");
   if(filename == ""){
     filename = lastFileModified(outputDirectory+"write/");
@@ -129,10 +129,10 @@ void draw() {
 
   int startHour = 10; int startMin = 0;
   int endHour = 16; int endMin = 0;
-  
+
   int startTime = startHour*60+startMin;
   int endTime = endHour*60+endMin;
-  int now = hour()*60+minute(); 
+  int now = hour()*60+minute();
   // println(endTime-now);
   if(now >= endTime){
     drawMessage("GTP done for the day", 0);
@@ -147,9 +147,9 @@ void draw() {
     } else {
       drawMessage("GTP starts at 10am", 0);
     }
-    return;  
+    return;
   }
-  
+
   int countdownSeconds = round(timeout-currentTime%timeout);
   if(countdownSeconds <= 3){
     drawCircle();
@@ -233,7 +233,7 @@ int fileNumber(String filename) {
   Matcher m = r.matcher(filename);
 
   if (m.find( )) {
-     return int(m.group(0)); 
+     return int(m.group(0));
   } else {
      return 0;
   }
@@ -241,7 +241,7 @@ int fileNumber(String filename) {
 
 String lastFileModified(String dir) {
   File fl = new File(dir);
-  File[] files = fl.listFiles(new FileFilter() {          
+  File[] files = fl.listFiles(new FileFilter() {
     public boolean accept(File file) {
       return true;
     }
@@ -251,7 +251,7 @@ String lastFileModified(String dir) {
     Arrays.sort(files);
     return files[files.length-1].getName();
   } else {
-     return ""; 
+     return "";
   }
-  
+
 }
