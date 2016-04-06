@@ -18,7 +18,7 @@ String logFilename = "log.txt";
 String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
 String outputDirectory = rootDirectory+"output/";
 
-int imageIntervalShort = 180;                  // seconds
+int imageIntervalShort = 240;                  // seconds
 int imageIntervalLong = 360;                   // seconds
 int imageInterval = imageIntervalShort;        // seconds
 int overThresholdCount = 0;
