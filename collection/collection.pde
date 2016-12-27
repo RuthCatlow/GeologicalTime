@@ -15,19 +15,15 @@ JSONArray config;
 Capture cam;
 String camLogFilename = "cams.txt";
 String logFilename = "log.txt";
-//String rootDirectory = "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/";
-String rootDirectory = "/home/furtherfield/Desktop/GeologicalTime/";
-String outputDirectory = rootDirectory+"output/";
 
-int imageIntervalShort = 240;                  // seconds
-int imageIntervalLong = 360;                   // seconds
-int imageInterval = imageIntervalShort;        // seconds
-int overThresholdCount = 0;
+// Defined in conig.json
+String rootDirectory = "";
+int cameraIndex       = 16;
+int imageInterval     = 240;        // seconds
+int freezeDuration    = 3000;       // milliseconds
+int outputImageWidth  = 720;
 
-int freezeDuration = 3000;                     // milliseconds
-
-int cameraIndex = 16;
-int outputImageWidth = 720;
+String outputDirectory;
 
 long mostRecent;
 int camScreenHeight = 0;
@@ -54,9 +50,14 @@ void setup() {
     if(name.equals(user)){
       isFound = true;
       rootDirectory = c.getString("rootDirectory");
+      outputDirectory = rootDirectory+"output/";
+      imageInterval = c.getInt("imageInterval");
+      freezeDuration = c.getInt("freezeDuration");
+      outputImageWidth = c.getInt("outputImageWidth");
       cameraIndex = c.getInt("cameraIndex");
     }
   }
+  
   if(isFound == false){
     println("Couldn't find user: ", user, " Please add to config.json");
     exit();  
@@ -64,6 +65,8 @@ void setup() {
   
   
   String filename = lastFileModified(outputDirectory+"tmp/");
+  println(filename);
+  exit();
   if(filename == ""){
     filename = lastFileModified(outputDirectory+"write/");
   }

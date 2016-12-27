@@ -1,9 +1,15 @@
 [{
   "name": "furtherfield",
   "rootDirectory" : "/home/furtherfield/Desktop/GeologicalTime/",
-	"cameraIndex" : 16
+	"cameraIndex" : 16,
+	"imageInterval" : 240,
+	"freezeDuration" : 3000,
+	"outputImageWidth" : 720
 }, {
   "name": "gareth",
   "rootDirectory" : "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/",
-	"cameraIndex" : 16
+	"cameraIndex" : 16,
+	"imageInterval" : 240,
+	"freezeDuration" : 3000,
+	"outputImageWidth" : 720
 }]
