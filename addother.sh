@@ -2,7 +2,7 @@
 # echo "${1}/write/*.png"
 
 WRITEDIR=write
-OTHERDIRECTORY=${1}/images/2016-03-11/*.png
+OTHERDIRECTORY=${1}/images/${2}/*.png
 
 SRCTOTAL=`ls ${1}/${WRITEDIR}/*.png | wc -l`
 OTHERTOTAL=`ls $OTHERDIRECTORY | wc -l`
