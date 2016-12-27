@@ -10,6 +10,7 @@ import processing.video.*;
 PrintWriter log;
 PrintWriter camLog;
 BufferedReader reader;
+JSONArray config;
 
 Capture cam;
 String camLogFilename = "cams.txt";
@@ -43,6 +44,24 @@ void settings() {
 
 void setup() {
   background(0);
+  
+  String user = System.getProperty("user.name");
+  boolean isFound = false;
+  config = loadJSONArray("../config.json");
+  for (int i = 0; i < config.size(); i++) {
+    JSONObject c = config.getJSONObject(i); 
+    String name = c.getString("name");
+    if(name.equals(user)){
+      isFound = true;
+      rootDirectory = c.getString("rootDirectory");
+      cameraIndex = c.getInt("cameraIndex");
+    }
+  }
+  if(isFound == false){
+    println("Couldn't find user: ", user, " Please add to config.json");
+    exit();  
+  }
+  
   
   String filename = lastFileModified(outputDirectory+"tmp/");
   if(filename == ""){
