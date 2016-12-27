@@ -80,7 +80,11 @@ if(locked == false){
   	winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
 		reorderImages();
 	} else {
-		console.log('Tmp file exists:', fileExists(nextTmpFile), "Video file doesn't exist:", !fileExists(nextVideoFile));
+		if(!fileExists(nextTmpFile))
+			console.log('Cannot start if tmp image file doesn\'t exist', nextTmpFile);
+
+		if(fileExists(nextVideoFile))
+			console.log("Cannot start if video file exist", nextVideoFile);
 	}
 }
 
