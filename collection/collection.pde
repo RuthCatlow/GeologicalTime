@@ -65,8 +65,6 @@ void setup() {
   
   
   String filename = lastFileModified(outputDirectory+"tmp/");
-  println(filename);
-  exit();
   if(filename == ""){
     filename = lastFileModified(outputDirectory+"write/");
   }
