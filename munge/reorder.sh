@@ -1,7 +1,9 @@
 #!/bin/bash
 # echo "${1}/write/*.png"
 
+# Count files in write to get expected number of next file.
 SRCTOTAL=`ls ${1}/write/*.png | wc -l`
+# Filename of next tmp file to be added.
 NEWFILE=`printf "${1}/tmp/out%05d.png" $((SRCTOTAL+1))`
 
 IMAGES=( ${1}/write/*.png )
