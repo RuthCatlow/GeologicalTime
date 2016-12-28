@@ -36,7 +36,7 @@ program
   .version('0.0.1')
   .option('-i, --input [path]', 'Specify an input directory')
   .option('-o, --output [path]', 'Change the output directory', __dirname+'/../output')
-  .option('-d, --duration <seconds>', 'Duration of output video in seconds', 180)
+  .option('-d, --duration <seconds>', 'Duration of output video in seconds', process.env.GTP_DURATION)
   .parse(process.argv);
 
 var inputDirectory = program.input || program.output + '/images/';
@@ -78,7 +78,8 @@ if(locked == false){
 
 	if(fileExists(nextTmpFile) && !fileExists(nextVideoFile)){
   	winston.log('info', '<<<<<<<<<<<<<<< START >>>>>>>>>>>>>>>>>>>');
-		reorderImages();
+		// reorderImages();
+		copyImage();
 	} else {
 		if(!fileExists(nextTmpFile))
 			console.log('Cannot start if tmp image file doesn\'t exist', nextTmpFile);
@@ -86,6 +87,24 @@ if(locked == false){
 		if(fileExists(nextVideoFile))
 			console.log("Cannot start if video file exist", nextVideoFile);
 	}
+}
+
+function copyImage(){
+	var args = [
+		program.output
+	];
+	var config = {
+		detached : false,
+		stdio: ['pipe', 'pipe', 'pipe']
+	};
+
+	var pid = run_cmd(
+		__dirname+'/copy.sh', args, config, function(numFiles){
+			images = fileList(program.output+'/write');
+			writeVideo();
+		}
+	);
+	fs.writeFile(program.output+'/reorder-pid', pid);
 }
 
 function reorderImages(){

@@ -22,7 +22,7 @@ var mailOptions = {
 	password: process.env.GTP_PASSWORD
 };
 
-var baseDirectory = process.env.GTP_BASE_DIR;
+var baseDirectory = process.env.GTP_BASE_CONTENT_DIR;
 var c = new ssh2();
 var sftp;
 
@@ -43,9 +43,11 @@ function ftpSend(fileNum){
   var image = program.output + "/tmp/out"+pad('00000', fileNum)+'.png'
   var video = program.output + "/videos/video-"+pad('00000', fileNum)+'.mp4'
 
+  /*
   fs.unlinkSync(program.output + "/count.json", function(){
     winston.info('info', 'Count json deleted whilst uploading');
   });
+  */
 
   var options = {
     host: process.env.GTP_HOST,
@@ -119,9 +121,13 @@ var re = /0*([1-9][0-9]*|0)/;
 var videoDirList = fileList(program.output+'/videos').reverse();
 var tmpDirList = fileList(program.output+'/tmp');
 var matchTmp = tmpDirList[0].match(re);
+// Cannot start until 2nd video is made
+if(videoDirList.length <= 1){
+  return;
+}
 // The second to most recent because the first could be encoding still.
 var matchVid = videoDirList[1].match(re);
-if(matchTmp[1] <= matchVid[1]){
+if(parseInt(matchTmp[1]) <= parseInt(matchVid[1])){
   winston.log('info', 'Send:'+ matchTmp[1]);
   ftpSend(matchTmp[1]);
 } else {
