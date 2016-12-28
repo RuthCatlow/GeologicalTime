@@ -22,7 +22,11 @@ int cameraIndex       = 16;
 int imageInterval     = 240;        // seconds
 int freezeDuration    = 3000;       // milliseconds
 int outputImageWidth  = 720;
-
+int startHour = 10; 
+int startMin = 0;
+int endHour = 16; 
+int endMin = 0;
+  
 String outputDirectory;
 
 long mostRecent;
@@ -55,6 +59,10 @@ void setup() {
       freezeDuration = c.getInt("freezeDuration");
       outputImageWidth = c.getInt("outputImageWidth");
       cameraIndex = c.getInt("cameraIndex");
+      startHour = constrain(c.getInt("startHour"), 1, 24);
+      startMin = constrain(c.getInt("startMin"), 0, 59);
+      endHour = constrain(c.getInt("endHour"), 1, 24);
+      endMin = constrain(c.getInt("endMin"), 0, 59);
     }
   }
 
@@ -147,9 +155,6 @@ void draw() {
   // Render cam on screen
   image(cam, 0, camScreenY, width, camScreenHeight);
 
-  int startHour = 10; int startMin = 0;
-  int endHour = 16; int endMin = 0;
-
   int startTime = startHour*60+startMin;
   int endTime = endHour*60+endMin;
   int now = hour()*60+minute();
@@ -215,7 +220,7 @@ void draw() {
 }
 
 void startMunge(){
- try {
+ try {  
     Process tr = Runtime.getRuntime().exec(rootDirectory+"munge/munge.sh");
     BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
     String s = rd.readLine();

@@ -4,12 +4,20 @@
 	"cameraIndex" : 16,
 	"imageInterval" : 240,
 	"freezeDuration" : 3000,
-	"outputImageWidth" : 720
+	"outputImageWidth" : 720,
+	"startHour" : 10,
+	"startMin" : 0,
+	"endHour" : 16,
+	"endMin" : 0
 }, {
   "name": "gareth",
   "rootDirectory" : "/home/gareth/Dropbox/Projects/GEOLOGICALTIME/",
 	"cameraIndex" : 16,
-	"imageInterval" : 240,
+	"imageInterval" : 120,
 	"freezeDuration" : 3000,
-	"outputImageWidth" : 720
+	"outputImageWidth" : 720,
+	"startHour" : 10,
+	"startMin" : 0,
+	"endHour" : 16,
+	"endMin" : 13
 }]
