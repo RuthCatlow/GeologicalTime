@@ -11,6 +11,8 @@ var playerStill = null;
 var count = 0;
 var fullscreenBodyClass = 'is-fullscreen';
 
+var contentDir = window.CONTENT_BASE || "";
+
 $(document).ready(function(){
 
   fullscreenEvents();
@@ -103,7 +105,7 @@ function setPlayerDimensions(player){
 function getCurrentCount(){
   $.ajax({
     type: 'GET',
-    url: '/count.json',
+    url: contentDir+'/count.json',
     // type of data we are expecting in return:
     dataType: 'json',
     cache: false,
@@ -159,7 +161,7 @@ function updateImageCount(){
 }
 
 function setImage(){
-  var filename = '/images/out'+pad('00000', count)+'.png';
+  var filename = contentDir+'/images/out'+pad('00000', count)+'.png';
   // var bgUrl = "url" + "("  + filename + ")";
   $(".gtp-js-image-still").attr("src", filename);
   $(".gtp-js-image-still").parent().css("background-image", "url("+filename+")");
@@ -167,7 +169,7 @@ function setImage(){
 }
 
 function setVideo(){
-  var filename = '/videos/video-'+pad('00000', count)+'.mp4';
+  var filename = contentDir+'/videos/video-'+pad('00000', count)+'.mp4';
   $("source", this.el_).attr("src", filename);
   player.src([
     { type: "video/mp4", src: filename }

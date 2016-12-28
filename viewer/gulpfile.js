@@ -16,11 +16,12 @@ gulp.task('default', function () {
 	var globs = [
 		'dist/*.css',
 		'dist/*.js',
-		'index.html',
-		'test.html',
-		'gallery.html',
+		// 'index.html',
+		// 'test.html',
+		// 'gallery.html',
     'assets/**/*',
-    'favicon.ico'
+    'favicon.ico',
+		'laf/index.html'
 	];
 
   var baseDirectory = process.env.GTP_BASE_DIR;
