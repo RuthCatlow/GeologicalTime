@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Geological Time Piece</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/dist/styles.css" media="all" rel="stylesheet" />
+
+  </head>
+  <body>
+		<script>
+			var ENV = "gallery";
+      var CONTENT_BASE = "/laf";
+		</script>
+    <script type="text/javascript" src="/dist/bundle.js" charset="utf-8"></script>
+
+    <div class="gtp-wrapper-half">
+      <div class="gtp-wrapper-half__inner">
+				<img class="gtp-js-image-still gtp-image-still" src="">
+      </div>
+    </div>
+    <div class="gtp-wrapper-half">
+			<p class="gtp-js-waiting-msg gtp-waiting-msg">Waiting...</p>
+      <div class="gtp-wrapper-half__inner">
+      	<video id="gtp-video" class="video-js vjs-default-skin" width="640" height="264">
+      	  <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+      	</video>
+      </div>
+    </div>
+		<button class="gtp-js-play gtp-btn-play">START</button>
+		<div class="gtp-image-count">Image count: <span class="gtp-js-count"></span></div>
+    <button class="button button--overlay gtp-js-fullscreen gtp-btn-fullscreen">Exhibit</button>
+    <canvas class="gtp-js-scale gtp-scale" id="scale" width="40"></canvas>
+
+  </body>
+</html>

@@ -20,7 +20,8 @@ $(document).ready(function(){
   var config = {
     controls : false,
     autoplay : false,
-    preload : "auto"
+    preload : "auto",
+    loop: true
   };
 
   if($('#gtp-video-still').length){
@@ -47,13 +48,13 @@ $(document).ready(function(){
 
   player = videojs("gtp-video", config);
   player.ready(function(){
-    $('body').addClass('is-waiting');
+    // $('body').addClass('is-waiting');
     // Pause because nothing to load yet.
     player.pause();
     // Set dimensions
     setPlayerDimensions(player);
     // Get count.
-    getCurrentCount();
+    setInterval(getCurrentCount, 2000);
   });
 
   // Player event - loadeddata/video ready.
@@ -103,6 +104,7 @@ function setPlayerDimensions(player){
 }
 
 function getCurrentCount(){
+  console.log("getCurrentCount");
   $.ajax({
     type: 'GET',
     url: contentDir+'/count.json',
@@ -111,7 +113,7 @@ function getCurrentCount(){
     cache: false,
     success: currentCountSuccess,
     error: function(xhr, type){
-      setTimeout(getCurrentCount, 2000);
+      // setTimeout(getCurrentCount, 2000);
     }
   })
 }
@@ -119,8 +121,8 @@ function getCurrentCount(){
 function currentCountSuccess(data){
   // console.log(data.count, count);
   if(data === null || data.count === count){
-    $('body').addClass('is-waiting');
-    setTimeout(getCurrentCount, 2000);
+    // $('body').addClass('is-waiting');
+    // setTimeout(getCurrentCount, 2000);
     return;
   }
   $('body').removeClass('is-waiting');
@@ -185,6 +187,7 @@ function setVideo(){
 }
 
 function onVideoEnd(){
+  console.log("onVideoEnd");
   getCurrentCount();
 }
 
