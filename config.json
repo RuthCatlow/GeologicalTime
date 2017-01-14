@@ -1,8 +1,8 @@
 [{
   "name": "furtherfield",
   "rootDirectory" : "/home/furtherfield/Desktop/GeologicalTime/",
-	"cameraIndex" : 16,
-	"imageInterval" : 240,
+	"cameraIndex" : 65,
+	"imageInterval" : 120,
 	"freezeDuration" : 3000,
 	"outputImageWidth" : 720,
 	"startHour" : 10,
