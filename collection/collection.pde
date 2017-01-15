@@ -272,7 +272,7 @@ String lastFileModified(String dir) {
     }
   });
 
-  if(files.length > 0){
+  if(files != null && files.length > 0){
     Arrays.sort(files);
     return files[files.length-1].getName();
   } else {
