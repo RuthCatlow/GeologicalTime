@@ -170,7 +170,7 @@ void draw() {
       drawMessage("GTP starts in", 120);
       drawCountdown(startCountdownSeconds);
     } else {
-      drawMessage("GTP starts at 10am", 0);
+      drawMessage("GTP starts at "+ startHour , 0);
     }
     return;
   }
