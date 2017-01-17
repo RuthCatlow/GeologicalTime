@@ -5,7 +5,7 @@
 	"imageInterval" : 140,
 	"freezeDuration" : 3000,
 	"outputImageWidth" : 720,
-	"startHour" : 10,
+	"startHour" : 11,
 	"startMin" : 0,
 	"endHour" : 21,
 	"endMin" : 0
@@ -16,7 +16,7 @@
 	"imageInterval" : 120,
 	"freezeDuration" : 3000,
 	"outputImageWidth" : 720,
-	"startHour" : 10,
+	"startHour" : 11,
 	"startMin" : 0,
 	"endHour" : 21,
 	"endMin" : 0
